@@ -1,7 +1,8 @@
+
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Ticket, Status, Priority, TicketType, ProductArea, Platform, Update, Dealership } from '../types';
 import { getTodayDateString, toInputDate, fromInputDate } from '../utils';
-import { X, Calendar, Copy, Trash2, Edit2, Save, Link as LinkIcon } from 'lucide-react';
+import { X, Calendar, Copy, Trash2, Edit2, Save, Link as LinkIcon, Plus } from 'lucide-react';
 import { useToast } from './Toast';
 
 interface TicketDrawerProps {
@@ -230,7 +231,7 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
   const renderField = (label: string, content: React.ReactNode) => (
       <div className="mb-1">
           <FieldLabel>{label}</FieldLabel>
-          <div className="min-h-[24px] flex items-center text-sm font-medium text-slate-800">
+          <div className="min-h-[24px] flex items-center text-sm font-normal text-slate-800">
             {content || <span className="text-slate-400 text-xs italic">Empty</span>}
           </div>
       </div>
@@ -259,7 +260,7 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
       return (
         <div className="mb-1">
              <FieldLabel>{label} Number</FieldLabel>
-             <div className="min-h-[24px] flex items-center text-sm font-medium text-slate-800">
+             <div className="min-h-[24px] flex items-center text-sm font-normal text-slate-800">
                  {val && link ? (
                      <a href={link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline hover:text-blue-800 font-semibold transition-colors">
                          {val}
@@ -454,7 +455,7 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
                         {isEditing ? (
                             <Input value={formData.summary} onChange={(e: any) => handleChange('summary', e.target.value)} placeholder="Short summary of the issue..." />
                         ) : (
-                            <div className="text-sm text-slate-800 font-medium">{formData.summary || "No summary provided."}</div>
+                            <div className="text-sm text-slate-800 font-normal">{formData.summary || "No summary provided."}</div>
                         )}
                     </div>
                     <div>
@@ -563,6 +564,17 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
                             </button>
                         </div>
                     </div>
+
+                    {isNew && (
+                        <div className="mt-8 flex justify-end border-t border-slate-100 pt-6">
+                            <button 
+                                onClick={handleSave}
+                                className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded shadow-md transition-all hover:shadow-lg w-full justify-center sm:w-auto"
+                            >
+                                <Plus size={18} /> Add Ticket
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="h-20"></div>
