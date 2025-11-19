@@ -1,5 +1,5 @@
 
-import { Ticket, TicketType, Status, Priority, ProductArea, Platform, Dealership, DealershipStatus, ReynoldsSolution, FullpathSolution, DMTProduct } from './types';
+import { Ticket, TicketType, Status, Priority, ProductArea, Platform, Dealership, DealershipStatus, ReynoldsSolution, FullpathSolution, DMTProduct, CRMProvider } from './types';
 import { getTodayDateString } from './utils';
 
 export const mockClients = [
@@ -184,6 +184,7 @@ export const createEmptyDealership = (): Dealership => ({
   storeNumber: '',
   branchNumber: '',
   address: '',
+  crmProvider: CRMProvider.FOCUS,
   websiteLinks: [{ id: Date.now().toString(), url: '', clientId: '' }],
   equityProvider: 'Fullpath Kelly Blue Book',
   reynoldsSolutions: [],
@@ -212,6 +213,7 @@ export const generateMockDealerships = (): Dealership[] => {
       eraSystemId: 4492,
       ppSysId: 8821,
       buId: 101,
+      crmProvider: CRMProvider.VinSolutions,
       address: '123 Peachtree Ln, Atlanta, GA 30301',
       websiteLinks: [
         { id: 'l1', url: 'https://www.northgatoyota.com', clientId: 'NGT-001' }
@@ -241,6 +243,7 @@ export const generateMockDealerships = (): Dealership[] => {
       storeNumber: '300',
       branchNumber: '05',
       eraSystemId: 9921,
+      crmProvider: CRMProvider.FOCUS,
       address: '500 Ocean Dr, Miami, FL 33101',
       websiteLinks: [],
       equityProvider: 'Kelly Blue Book',

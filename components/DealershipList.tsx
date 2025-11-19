@@ -131,25 +131,36 @@ export default function DealershipList({
                                 </div>
 
                                 {/* Body Grid */}
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-3 text-xs text-slate-600">
+                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mt-3 text-xs text-slate-600">
+                                    {/* 1. CRM Provider */}
                                     <div className="flex flex-col">
-                                        <span className="uppercase font-bold text-[10px] text-slate-400 mb-0.5">PPSysID</span>
+                                        <span className="uppercase font-bold text-[10px] text-slate-400 mb-0.5">CRM</span>
                                         <span className="font-medium">
-                                             {dealership.ppSysId || 'N/A'}
+                                             {dealership.crmProvider || 'N/A'}
                                         </span>
                                     </div>
-                                    <div className="flex flex-col">
-                                        <span className="uppercase font-bold text-[10px] text-slate-400 mb-0.5">Store / Branch</span>
-                                        <span className="font-medium">
-                                             {dealership.storeNumber || '-'} / {dealership.branchNumber || '-'}
-                                        </span>
-                                    </div>
+                                    {/* 2. ERA ID */}
                                     <div className="flex flex-col">
                                         <span className="uppercase font-bold text-[10px] text-slate-400 mb-0.5">ERA ID</span>
                                         <span className="font-medium">
                                              {dealership.eraSystemId || 'N/A'}
                                         </span>
                                     </div>
+                                    {/* 3. Store / Branch */}
+                                    <div className="flex flex-col">
+                                        <span className="uppercase font-bold text-[10px] text-slate-400 mb-0.5">Store / Branch</span>
+                                        <span className="font-medium">
+                                             {dealership.storeNumber || '-'} / {dealership.branchNumber || '-'}
+                                        </span>
+                                    </div>
+                                    {/* 4. PPSysID */}
+                                    <div className="flex flex-col">
+                                        <span className="uppercase font-bold text-[10px] text-slate-400 mb-0.5">PPSysID</span>
+                                        <span className="font-medium">
+                                             {dealership.ppSysId || 'N/A'}
+                                        </span>
+                                    </div>
+                                    {/* 5. Go-Live */}
                                     <div className="flex flex-col">
                                         <span className="uppercase font-bold text-[10px] text-slate-400 mb-0.5">Go-Live</span>
                                         <span className="font-medium">

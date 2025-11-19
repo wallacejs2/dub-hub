@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { Dealership, DealershipStatus, ReynoldsSolution, FullpathSolution, WebsiteLink, DMTOrderItem } from '../types';
+import { Dealership, DealershipStatus, ReynoldsSolution, FullpathSolution, WebsiteLink, DMTOrderItem, CRMProvider } from '../types';
 import { DMT_PRODUCTS } from '../mockData';
 import { getTodayDateString, toInputDate, fromInputDate } from '../utils';
 import { X, Edit2, Save, Trash2, Plus, ExternalLink, CheckCircle, Circle, DollarSign } from 'lucide-react';
@@ -84,7 +84,11 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
   useEffect(() => {
     if (dealership) {
       // Ensure dmtOrders exists if loading older data
-      const safeData = { ...dealership, dmtOrders: dealership.dmtOrders || [] };
+      const safeData = { 
+          ...dealership, 
+          dmtOrders: dealership.dmtOrders || [],
+          crmProvider: dealership.crmProvider || CRMProvider.FOCUS
+      };
       setFormData(safeData);
       setIsEditing(isNew);
     }
@@ -112,7 +116,11 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
           onClose();
       } else {
           // Revert to original
-          if(dealership) setFormData({ ...dealership, dmtOrders: dealership.dmtOrders || [] });
+          if(dealership) setFormData({ 
+              ...dealership, 
+              dmtOrders: dealership.dmtOrders || [],
+              crmProvider: dealership.crmProvider || CRMProvider.FOCUS
+          });
           setIsEditing(false);
       }
   }
@@ -315,6 +323,15 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
                                 <div><FieldLabel>ERA System ID</FieldLabel><Input type="number" value={formData.eraSystemId} onChange={(e: any) => handleChange('eraSystemId', parseInt(e.target.value) || undefined)} /></div>
                                 <div><FieldLabel>PPSysID</FieldLabel><Input type="number" value={formData.ppSysId} onChange={(e: any) => handleChange('ppSysId', parseInt(e.target.value) || undefined)} /></div>
                                 <div><FieldLabel>BU-ID</FieldLabel><Input type="number" value={formData.buId} onChange={(e: any) => handleChange('buId', parseInt(e.target.value) || undefined)} /></div>
+                                
+                                <div>
+                                    <FieldLabel>CRM Provider</FieldLabel>
+                                    <Select 
+                                        value={formData.crmProvider} 
+                                        options={Object.values(CRMProvider)} 
+                                        onChange={(e: any) => handleChange('crmProvider', e.target.value)} 
+                                    />
+                                </div>
 
                                 <div className="col-span-3"><FieldLabel>Address</FieldLabel><Input value={formData.address} onChange={(e: any) => handleChange('address', e.target.value)} /></div>
                             </>
@@ -326,6 +343,7 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
                                 {renderField('ERA System ID', formData.eraSystemId)}
                                 {renderField('PPSysID', formData.ppSysId)}
                                 {renderField('BU-ID', formData.buId)}
+                                {renderField('CRM Provider', formData.crmProvider)}
                                 <div className="col-span-3">{renderField('Address', formData.address)}</div>
                             </>
                         )}

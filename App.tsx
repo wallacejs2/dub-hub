@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { Ticket, Status, TicketFilterState, TicketType, Priority, ProductArea, Update, Dealership } from './types';
+import { Ticket, Status, TicketFilterState, TicketType, Priority, ProductArea, Update, Dealership, CRMProvider } from './types';
 import { generateMockTickets, createEmptyTicket, generateMockDealerships, createEmptyDealership } from './mockData';
 import { getTodayDateString } from './utils';
 import Layout, { ViewMode } from './components/Layout';
@@ -52,7 +52,8 @@ function AppContent() {
                   websiteLinks: d.websiteLinks || [],
                   reynoldsSolutions: d.reynoldsSolutions || [],
                   fullpathSolutions: d.fullpathSolutions || [],
-                  dmtOrders: d.dmtOrders || []
+                  dmtOrders: d.dmtOrders || [],
+                  crmProvider: d.crmProvider || CRMProvider.FOCUS
               }));
           }
       } catch (error) {

@@ -74,6 +74,19 @@ export enum DealershipStatus {
   Cancelled = 'Cancelled'
 }
 
+export enum CRMProvider {
+  FOCUS = 'FOCUS',
+  CDK = 'CDK',
+  DealerOwned = 'DealerOwned',
+  DealerSocket = 'DealerSocket',
+  DriveCentric = 'DriveCentric',
+  Elead = 'Elead',
+  Momentum = 'Momentum',
+  OpLogic = 'OpLogic',
+  Tekion = 'Tekion',
+  VinSolutions = 'VinSolutions'
+}
+
 export enum ReynoldsSolution {
   XTS = 'XTS',
   MMS = 'MMS',
@@ -128,6 +141,7 @@ export interface Dealership {
   eraSystemId?: number;
   ppSysId?: number;
   buId?: number;
+  crmProvider: CRMProvider;
   address: string;
 
   // Links
