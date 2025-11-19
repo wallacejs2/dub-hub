@@ -8,16 +8,37 @@ import TicketDrawer from './components/TicketDrawer';
 import { ToastProvider, useToast } from './components/Toast';
 
 function AppContent() {
-  const [tickets, setTickets] = useState<Ticket[]>([]);
+  // Initialize tickets from Local Storage or fallback to Mock Data
+  const [tickets, setTickets] = useState<Ticket[]>(() => {
+    try {
+      const savedData = localStorage.getItem('dubhub-tickets');
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        // Robustness: Merge saved data with empty ticket structure to ensure new fields (like summary) exist
+        // This handles schema migrations automatically for local storage data
+        const empty = createEmptyTicket(); 
+        return parsedData.map((t: any) => ({
+            ...empty, // defaults
+            ...t,     // saved values override defaults
+            id: t.id, // ensure ID is preserved (createEmptyTicket generates a new random ID)
+            updates: t.updates || [] // ensure arrays exist
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to parse local storage data:", error);
+    }
+    return generateMockTickets();
+  });
+
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [selectedTicketIds, setSelectedTicketIds] = useState<Set<string>>(new Set());
   const [draftTicket, setDraftTicket] = useState<Ticket | null>(null);
   const { addToast } = useToast();
 
-  // Initialize Mock Data
+  // Persist tickets to Local Storage whenever they change
   useEffect(() => {
-    setTickets(generateMockTickets());
-  }, []);
+    localStorage.setItem('dubhub-tickets', JSON.stringify(tickets));
+  }, [tickets]);
 
   // --- CRUD Operations ---
 

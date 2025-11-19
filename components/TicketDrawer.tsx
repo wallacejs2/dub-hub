@@ -135,10 +135,7 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
       setIsEditing(isNew); // Auto edit if new
       setNewUpdateDate(getTodayDateString());
     }
-  }, [ticket, isOpen, isNew]);
-
-  // Only don't render if we have absolutely no data to show (initial load)
-  if (!formData) return null;
+  }, [ticket, isNew]);
 
   const handleChange = (field: keyof Ticket, value: any) => {
     setFormData(prev => prev ? ({ ...prev, [field]: value }) : null);
@@ -237,12 +234,13 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
   const renderLinkInput = (valKey: keyof Ticket, linkKey: keyof Ticket, label: string) => (
     <div className="space-y-1">
         <FieldLabel>{label} #</FieldLabel>
-        <Input type="number" value={formData[valKey]} onChange={(e: any) => handleChange(valKey, parseInt(e.target.value) || undefined)} placeholder="#" />
-        <Input value={formData[linkKey]} onChange={(e: any) => handleChange(linkKey, e.target.value)} placeholder={`${label} URL`} className="text-xs" />
+        <Input type="number" value={formData && formData[valKey]} onChange={(e: any) => handleChange(valKey, parseInt(e.target.value) || undefined)} placeholder="#" />
+        <Input value={formData && formData[linkKey]} onChange={(e: any) => handleChange(linkKey, e.target.value)} placeholder={`${label} URL`} className="text-xs" />
     </div>
   );
 
   const renderLinkDisplay = (valKey: keyof Ticket, linkKey: keyof Ticket, label: string) => {
+      if (!formData) return null;
       const val = formData[valKey];
       const link = formData[linkKey];
       
@@ -280,284 +278,292 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
       {/* Drawer */}
       <div className={`fixed top-0 right-0 bottom-0 w-full max-w-4xl bg-white shadow-2xl z-50 flex flex-col transform transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         
-        {/* Header Section */}
-        <div className="px-8 py-6 border-b border-slate-200 bg-white flex flex-col gap-4">
-            {/* Row 1: Buttons Row (Right Aligned) */}
-            <div className="flex items-center justify-end gap-2">
-                {!isNew && (
-                    <>
-                        <button className="flex items-center gap-2 px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-xs font-medium rounded shadow-sm transition-colors" onClick={() => addToast("Copied info to clipboard", "success")}>
-                            <Copy size={14} /> Copy Info
+        {formData ? (
+            <>
+                {/* Header Section */}
+                <div className="px-8 py-6 border-b border-slate-200 bg-white flex flex-col gap-4">
+                    {/* Row 1: Buttons Row (Right Aligned) */}
+                    <div className="flex items-center justify-end gap-2">
+                        {!isNew && (
+                            <>
+                                <button className="flex items-center gap-2 px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-xs font-medium rounded shadow-sm transition-colors" onClick={() => addToast("Copied info to clipboard", "success")}>
+                                    <Copy size={14} /> Copy Info
+                                </button>
+                                <button className="flex items-center gap-2 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded shadow-sm transition-colors" onClick={handleDelete}>
+                                    <Trash2 size={14} /> Delete
+                                </button>
+                            </>
+                        )}
+                        
+                        {isEditing ? (
+                            <button 
+                                onClick={handleSave}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded shadow-sm transition-colors"
+                            >
+                                <Save size={14} /> Save
+                            </button>
+                        ) : (
+                            <button 
+                                onClick={() => setIsEditing(true)}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded shadow-sm transition-colors"
+                            >
+                                <Edit2 size={14} /> Edit
+                            </button>
+                        )}
+
+                        <button onClick={onClose} className="ml-2 p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600">
+                            <X size={20} />
                         </button>
-                        <button className="flex items-center gap-2 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded shadow-sm transition-colors" onClick={handleDelete}>
-                            <Trash2 size={14} /> Delete
-                        </button>
-                    </>
-                )}
+                    </div>
+
+                    {/* Row 2: Ticket Name Field */}
+                    <div>
+                        {!isEditing ? (
+                            <h2 className="text-2xl font-bold text-slate-900 leading-tight break-words">{formData.title}</h2>
+                        ) : (
+                            <div className="flex-1">
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Ticket Name</label>
+                                <Input value={formData.title} onChange={(e: any) => handleChange('title', e.target.value)} placeholder="Enter Ticket Title..." className="text-lg font-bold" />
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-slate-50/50" ref={scrollRef}>
                 
-                {isEditing ? (
-                    <button 
-                        onClick={handleSave}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded shadow-sm transition-colors"
-                    >
-                        <Save size={14} /> Save
-                    </button>
-                ) : (
-                    <button 
-                        onClick={() => setIsEditing(true)}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded shadow-sm transition-colors"
-                    >
-                        <Edit2 size={14} /> Edit
-                    </button>
-                )}
+                {/* 1. Core Information */}
+                <SectionHeader>Core Information</SectionHeader>
+                <div className="grid grid-cols-3 gap-x-8 gap-y-6">
+                    {/* Row 1: Type, Priority, Status */}
+                    {isEditing ? (
+                        <>
+                            <div><FieldLabel>Type</FieldLabel><Select value={formData.type} options={Object.values(TicketType)} onChange={(e: any) => handleChange('type', e.target.value)} /></div>
+                            <div><FieldLabel>Priority</FieldLabel><Select value={formData.priority} options={Object.values(Priority)} onChange={(e: any) => handleChange('priority', e.target.value)} /></div>
+                            <div><FieldLabel>Status</FieldLabel><Select value={formData.status} options={Object.values(Status)} onChange={(e: any) => handleChange('status', e.target.value)} /></div>
+                        </>
+                    ) : (
+                        <>
+                            {renderField('Type', <TypeBadge type={formData.type} />)}
+                            {renderField('Priority', <PriorityBadge priority={formData.priority} />)}
+                            {renderField('Status', <StatusBadge status={formData.status} />)}
+                        </>
+                    )}
 
-                <button onClick={onClose} className="ml-2 p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600">
-                    <X size={20} />
-                </button>
-            </div>
-
-            {/* Row 2: Ticket Name Field */}
-            <div>
-                {!isEditing ? (
-                     <h2 className="text-2xl font-bold text-slate-900 leading-tight break-words">{formData.title}</h2>
-                ) : (
-                    <div className="flex-1">
-                         <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Ticket Name</label>
-                         <Input value={formData.title} onChange={(e: any) => handleChange('title', e.target.value)} placeholder="Enter Ticket Title..." className="text-lg font-bold" />
+                    {/* Row 2: Status Reason */}
+                    <div className="col-span-3">
+                        {isEditing ? (
+                            <div><FieldLabel>Status Reason</FieldLabel><Input value={formData.reason} onChange={(e: any) => handleChange('reason', e.target.value)} placeholder="Reason..." /></div>
+                        ) : (
+                            renderField('Status Reason', <span className="text-slate-600">{formData.reason}</span>)
+                        )}
                     </div>
-                )}
-            </div>
-        </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-slate-50/50" ref={scrollRef}>
-          
-          {/* 1. Core Information */}
-          <SectionHeader>Core Information</SectionHeader>
-          <div className="grid grid-cols-3 gap-x-8 gap-y-6">
-            {/* Row 1: Type, Priority, Status */}
-            {isEditing ? (
-                <>
-                    <div><FieldLabel>Type</FieldLabel><Select value={formData.type} options={Object.values(TicketType)} onChange={(e: any) => handleChange('type', e.target.value)} /></div>
-                    <div><FieldLabel>Priority</FieldLabel><Select value={formData.priority} options={Object.values(Priority)} onChange={(e: any) => handleChange('priority', e.target.value)} /></div>
-                    <div><FieldLabel>Status</FieldLabel><Select value={formData.status} options={Object.values(Status)} onChange={(e: any) => handleChange('status', e.target.value)} /></div>
-                </>
-            ) : (
-                <>
-                    {renderField('Type', <TypeBadge type={formData.type} />)}
-                    {renderField('Priority', <PriorityBadge priority={formData.priority} />)}
-                    {renderField('Status', <StatusBadge status={formData.status} />)}
-                </>
-            )}
+                    {/* Row 3: Product Area, Platform, Location */}
+                    {isEditing ? (
+                        <>
+                            <div><FieldLabel>Product Area</FieldLabel><Select value={formData.productArea} options={Object.values(ProductArea)} onChange={(e: any) => handleChange('productArea', e.target.value)} /></div>
+                            <div><FieldLabel>Platform</FieldLabel><Select value={formData.platform} options={Object.values(Platform)} onChange={(e: any) => handleChange('platform', e.target.value)} /></div>
+                            <div><FieldLabel>Location</FieldLabel><Input value={formData.location} onChange={(e: any) => handleChange('location', e.target.value)} /></div>
+                        </>
+                    ) : (
+                        <>
+                            {renderField('Product Area', getProductAreaBadge(formData.productArea))}
+                            {renderField('Platform', getPlatformBadge(formData.platform))}
+                            {renderField('Location', formData.location)}
+                        </>
+                    )}
+                </div>
 
-            {/* Row 2: Status Reason */}
-            <div className="col-span-3">
-                {isEditing ? (
-                    <div><FieldLabel>Status Reason</FieldLabel><Input value={formData.reason} onChange={(e: any) => handleChange('reason', e.target.value)} placeholder="Reason..." /></div>
-                ) : (
-                    renderField('Status Reason', <span className="text-slate-600">{formData.reason}</span>)
-                )}
-            </div>
-
-            {/* Row 3: Product Area, Platform, Location */}
-            {isEditing ? (
-                <>
-                     <div><FieldLabel>Product Area</FieldLabel><Select value={formData.productArea} options={Object.values(ProductArea)} onChange={(e: any) => handleChange('productArea', e.target.value)} /></div>
-                     <div><FieldLabel>Platform</FieldLabel><Select value={formData.platform} options={Object.values(Platform)} onChange={(e: any) => handleChange('platform', e.target.value)} /></div>
-                     <div><FieldLabel>Location</FieldLabel><Input value={formData.location} onChange={(e: any) => handleChange('location', e.target.value)} /></div>
-                </>
-            ) : (
-                <>
-                    {renderField('Product Area', getProductAreaBadge(formData.productArea))}
-                    {renderField('Platform', getPlatformBadge(formData.platform))}
-                    {renderField('Location', formData.location)}
-                </>
-            )}
-          </div>
-
-          {/* 2. Dates */}
-          <SectionHeader>Dates</SectionHeader>
-          <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-            {isEditing ? (
-                <>
-                    <div>
-                        <FieldLabel>Start Date</FieldLabel>
-                        <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14}/>
-                            <Input type="date" className="pl-9" value={toInputDate(formData.startDate)} onChange={(e: any) => handleChange('startDate', fromInputDate(e.target.value))} />
-                        </div>
-                    </div>
-                    <div>
-                        <FieldLabel>Last Updated</FieldLabel>
-                        <div className="px-3 py-1.5 bg-slate-100 text-slate-500 rounded text-sm border border-slate-200">{formData.lastUpdatedDate}</div>
-                    </div>
-                </>
-            ) : (
-                <>
-                    {renderField('Start Date', formData.startDate)}
-                    {renderField('Last Updated', formData.lastUpdatedDate)}
-                </>
-            )}
-          </div>
-
-          {/* 3. Tracking & Ownership */}
-          <SectionHeader>Tracking & Ownership</SectionHeader>
-          <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-             {/* Row 1 */}
-             {isEditing ? (
-                 <>
-                    <div><FieldLabel>Submitter</FieldLabel><Input value={formData.submitterName} onChange={(e: any) => handleChange('submitterName', e.target.value)} /></div>
-                    <div><FieldLabel>Client</FieldLabel><Input value={formData.client} onChange={(e: any) => handleChange('client', e.target.value)} placeholder="Client Name" /></div>
-                 </>
-             ) : (
-                 <>
-                    {renderField('Submitter', formData.submitterName)}
-                    {renderField('Client', formData.client)}
-                 </>
-             )}
-
-             {/* Row 2: PMR */}
-             {isEditing ? renderLinkInput('pmrNumber', 'pmrLink', 'PMR') : renderLinkDisplay('pmrNumber', 'pmrLink', 'PMR')}
-             
-             {/* Row 3: PMG */}
-             {isEditing ? renderLinkInput('pmgNumber', 'pmgLink', 'PMG') : renderLinkDisplay('pmgNumber', 'pmgLink', 'PMG')}
-             {isEditing ? renderLinkInput('cpmNumber', 'cpmLink', 'CPM') : renderLinkDisplay('cpmNumber', 'cpmLink', 'CPM')}
-             
-             {/* FP Ticket & Thread */}
-             {isEditing ? (
-                 <>
-                    <div><FieldLabel>FP Ticket Number</FieldLabel><Input type="number" value={formData.fpTicketNumber} onChange={(e: any) => handleChange('fpTicketNumber', parseInt(e.target.value) || undefined)} /></div>
-                    <div><FieldLabel>Ticket Thread ID</FieldLabel><Input value={formData.ticketThreadId} onChange={(e: any) => handleChange('ticketThreadId', e.target.value)} /></div>
-                 </>
-             ) : (
-                 <>
-                    {renderField('FP Ticket Number', formData.fpTicketNumber ? `#${formData.fpTicketNumber}` : null)}
-                    {renderField('Ticket Thread ID', formData.ticketThreadId)}
-                 </>
-             )}
-          </div>
-
-          {/* 4. Issue Information */}
-          <SectionHeader>Issue Information</SectionHeader>
-          <div className="space-y-6">
-            <div>
-                <FieldLabel>Summary</FieldLabel>
-                {isEditing ? (
-                    <Input value={formData.summary} onChange={(e: any) => handleChange('summary', e.target.value)} placeholder="Short summary of the issue..." />
-                ) : (
-                    <div className="text-sm text-slate-800 font-medium">{formData.summary || "No summary provided."}</div>
-                )}
-            </div>
-            <div>
-                <FieldLabel>Details</FieldLabel>
-                {isEditing ? (
-                    <TextArea value={formData.details} onChange={(e: any) => handleChange('details', e.target.value)} className="h-32" />
-                ) : (
-                    <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{formData.details || "No details provided."}</p>
-                )}
-            </div>
-          </div>
-
-          {/* 5. Ticket Activity */}
-          <SectionHeader>Ticket Activity ({formData.updates.length})</SectionHeader>
-          
-          <div className="space-y-6">
-             {formData.updates.length === 0 ? (
-                <p className="text-slate-400 italic text-sm">No activity recorded yet.</p>
-             ) : (
-                 <div className="space-y-4">
-                    {formData.updates.map((update) => (
-                        <div key={update.id} className="flex gap-3 group">
-                            <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 text-xs font-bold shrink-0 uppercase">
-                                {update.author.charAt(0)}
+                {/* 2. Dates */}
+                <SectionHeader>Dates</SectionHeader>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                    {isEditing ? (
+                        <>
+                            <div>
+                                <FieldLabel>Start Date</FieldLabel>
+                                <div className="relative">
+                                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14}/>
+                                    <Input type="date" className="pl-9" value={toInputDate(formData.startDate)} onChange={(e: any) => handleChange('startDate', fromInputDate(e.target.value))} />
+                                </div>
                             </div>
-                            <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex-1 relative">
-                                {editingUpdateId === update.id && tempUpdate ? (
-                                    // Edit Mode for Comment
-                                    <div className="space-y-3">
-                                         <div className="grid grid-cols-2 gap-2">
-                                            <div><FieldLabel>Name</FieldLabel><Input value={tempUpdate.author} onChange={(e: any) => setTempUpdate({...tempUpdate, author: e.target.value})} /></div>
-                                            <div>
-                                                <FieldLabel>Date</FieldLabel>
-                                                <Input type="date" value={toInputDate(tempUpdate.date)} onChange={(e: any) => setTempUpdate({...tempUpdate, date: fromInputDate(e.target.value)})} />
-                                            </div>
-                                         </div>
-                                         <div>
-                                            <FieldLabel>Comment</FieldLabel>
-                                            <TextArea value={tempUpdate.comment} onChange={(e: any) => setTempUpdate({...tempUpdate, comment: e.target.value})} />
-                                         </div>
-                                         <div className="flex gap-2 justify-end">
-                                            <button onClick={cancelEditingUpdate} className="text-xs text-slate-500 hover:underline">Cancel</button>
-                                            <button onClick={saveEditingUpdate} className="flex items-center gap-1 text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"><Save size={12}/> Save Update</button>
-                                         </div>
+                            <div>
+                                <FieldLabel>Last Updated</FieldLabel>
+                                <div className="px-3 py-1.5 bg-slate-100 text-slate-500 rounded text-sm border border-slate-200">{formData.lastUpdatedDate}</div>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            {renderField('Start Date', formData.startDate)}
+                            {renderField('Last Updated', formData.lastUpdatedDate)}
+                        </>
+                    )}
+                </div>
+
+                {/* 3. Tracking & Ownership */}
+                <SectionHeader>Tracking & Ownership</SectionHeader>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                    {/* Row 1 */}
+                    {isEditing ? (
+                        <>
+                            <div><FieldLabel>Submitter</FieldLabel><Input value={formData.submitterName} onChange={(e: any) => handleChange('submitterName', e.target.value)} /></div>
+                            <div><FieldLabel>Client</FieldLabel><Input value={formData.client} onChange={(e: any) => handleChange('client', e.target.value)} placeholder="Client Name" /></div>
+                        </>
+                    ) : (
+                        <>
+                            {renderField('Submitter', formData.submitterName)}
+                            {renderField('Client', formData.client)}
+                        </>
+                    )}
+
+                    {/* Row 2: PMR */}
+                    {isEditing ? renderLinkInput('pmrNumber', 'pmrLink', 'PMR') : renderLinkDisplay('pmrNumber', 'pmrLink', 'PMR')}
+                    
+                    {/* Row 3: PMG */}
+                    {isEditing ? renderLinkInput('pmgNumber', 'pmgLink', 'PMG') : renderLinkDisplay('pmgNumber', 'pmgLink', 'PMG')}
+                    {isEditing ? renderLinkInput('cpmNumber', 'cpmLink', 'CPM') : renderLinkDisplay('cpmNumber', 'cpmLink', 'CPM')}
+                    
+                    {/* FP Ticket & Thread */}
+                    {isEditing ? (
+                        <>
+                            <div><FieldLabel>FP Ticket Number</FieldLabel><Input type="number" value={formData.fpTicketNumber} onChange={(e: any) => handleChange('fpTicketNumber', parseInt(e.target.value) || undefined)} /></div>
+                            <div><FieldLabel>Ticket Thread ID</FieldLabel><Input value={formData.ticketThreadId} onChange={(e: any) => handleChange('ticketThreadId', e.target.value)} /></div>
+                        </>
+                    ) : (
+                        <>
+                            {renderField('FP Ticket Number', formData.fpTicketNumber ? `#${formData.fpTicketNumber}` : null)}
+                            {renderField('Ticket Thread ID', formData.ticketThreadId)}
+                        </>
+                    )}
+                </div>
+
+                {/* 4. Issue Information */}
+                <SectionHeader>Issue Information</SectionHeader>
+                <div className="space-y-6">
+                    <div>
+                        <FieldLabel>Summary</FieldLabel>
+                        {isEditing ? (
+                            <Input value={formData.summary} onChange={(e: any) => handleChange('summary', e.target.value)} placeholder="Short summary of the issue..." />
+                        ) : (
+                            <div className="text-sm text-slate-800 font-medium">{formData.summary || "No summary provided."}</div>
+                        )}
+                    </div>
+                    <div>
+                        <FieldLabel>Details</FieldLabel>
+                        {isEditing ? (
+                            <TextArea value={formData.details} onChange={(e: any) => handleChange('details', e.target.value)} className="h-32" />
+                        ) : (
+                            <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{formData.details || "No details provided."}</p>
+                        )}
+                    </div>
+                </div>
+
+                {/* 5. Ticket Activity */}
+                <SectionHeader>Ticket Activity ({formData.updates.length})</SectionHeader>
+                
+                <div className="space-y-6">
+                    {formData.updates.length === 0 ? (
+                        <p className="text-slate-400 italic text-sm">No activity recorded yet.</p>
+                    ) : (
+                        <div className="space-y-4">
+                            {formData.updates.map((update) => (
+                                <div key={update.id} className="flex gap-3 group">
+                                    <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 text-xs font-bold shrink-0 uppercase">
+                                        {update.author.charAt(0)}
                                     </div>
-                                ) : (
-                                    // View Mode for Comment
-                                    <>
-                                        <div className="flex justify-between items-center mb-1">
-                                            <span className="font-bold text-xs text-slate-700">{update.author}</span>
-                                            <span className="text-[10px] text-slate-400">{update.date}</span>
-                                        </div>
-                                        <p className="text-sm text-slate-600 whitespace-pre-wrap">{update.comment}</p>
-                                        
-                                        {/* Action Buttons (Hidden until hover) */}
-                                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button onClick={() => startEditingUpdate(update)} className="p-1 text-slate-400 hover:text-blue-500"><Edit2 size={12}/></button>
-                                            <button onClick={() => handleDeleteUpdate(update.id)} className="p-1 text-slate-400 hover:text-red-500"><Trash2 size={12}/></button>
-                                        </div>
-                                    </>
-                                )}
+                                    <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex-1 relative">
+                                        {editingUpdateId === update.id && tempUpdate ? (
+                                            // Edit Mode for Comment
+                                            <div className="space-y-3">
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <div><FieldLabel>Name</FieldLabel><Input value={tempUpdate.author} onChange={(e: any) => setTempUpdate({...tempUpdate, author: e.target.value})} /></div>
+                                                    <div>
+                                                        <FieldLabel>Date</FieldLabel>
+                                                        <Input type="date" value={toInputDate(tempUpdate.date)} onChange={(e: any) => setTempUpdate({...tempUpdate, date: fromInputDate(e.target.value)})} />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <FieldLabel>Comment</FieldLabel>
+                                                    <TextArea value={tempUpdate.comment} onChange={(e: any) => setTempUpdate({...tempUpdate, comment: e.target.value})} />
+                                                </div>
+                                                <div className="flex gap-2 justify-end">
+                                                    <button onClick={cancelEditingUpdate} className="text-xs text-slate-500 hover:underline">Cancel</button>
+                                                    <button onClick={saveEditingUpdate} className="flex items-center gap-1 text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"><Save size={12}/> Save Update</button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            // View Mode for Comment
+                                            <>
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <span className="font-bold text-xs text-slate-700">{update.author}</span>
+                                                    <span className="text-[10px] text-slate-400">{update.date}</span>
+                                                </div>
+                                                <p className="text-sm text-slate-600 whitespace-pre-wrap">{update.comment}</p>
+                                                
+                                                {/* Action Buttons (Hidden until hover) */}
+                                                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button onClick={() => startEditingUpdate(update)} className="p-1 text-slate-400 hover:text-blue-500"><Edit2 size={12}/></button>
+                                                    <button onClick={() => handleDeleteUpdate(update.id)} className="p-1 text-slate-400 hover:text-red-500"><Trash2 size={12}/></button>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Add Comment Box with Name/Date Fields */}
+                    <div className="mt-6 p-4 bg-white rounded-lg border border-slate-200 shadow-sm">
+                        <div className="grid grid-cols-2 gap-3 mb-3">
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-400 uppercase">Your Name</label>
+                                <input 
+                                    className="w-full text-sm border-b border-slate-200 focus:border-primary focus:outline-none py-1" 
+                                    value={newUpdateAuthor} 
+                                    onChange={(e) => setNewUpdateAuthor(e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-400 uppercase">Date</label>
+                                <input 
+                                    type="date"
+                                    className="w-full text-sm border-b border-slate-200 focus:border-primary focus:outline-none py-1 text-slate-600" 
+                                    value={toInputDate(newUpdateDate)} 
+                                    onChange={(e) => setNewUpdateDate(fromInputDate(e.target.value))}
+                                />
                             </div>
                         </div>
-                    ))}
-                 </div>
-             )}
-
-             {/* Add Comment Box with Name/Date Fields */}
-             <div className="mt-6 p-4 bg-white rounded-lg border border-slate-200 shadow-sm">
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                    <div>
-                        <label className="text-[10px] font-bold text-slate-400 uppercase">Your Name</label>
-                        <input 
-                            className="w-full text-sm border-b border-slate-200 focus:border-primary focus:outline-none py-1" 
-                            value={newUpdateAuthor} 
-                            onChange={(e) => setNewUpdateAuthor(e.target.value)}
+                        <textarea 
+                            className="w-full text-sm border-none focus:ring-0 p-0 mb-3 resize-none placeholder:text-slate-400"
+                            placeholder="Write a comment or update..."
+                            rows={2}
+                            value={newUpdateText}
+                            onChange={(e) => setNewUpdateText(e.target.value)}
                         />
-                    </div>
-                    <div>
-                         <label className="text-[10px] font-bold text-slate-400 uppercase">Date</label>
-                         <input 
-                            type="date"
-                            className="w-full text-sm border-b border-slate-200 focus:border-primary focus:outline-none py-1 text-slate-600" 
-                            value={toInputDate(newUpdateDate)} 
-                            onChange={(e) => setNewUpdateDate(fromInputDate(e.target.value))}
-                         />
+                        <div className="flex justify-between items-center border-t border-slate-100 pt-3">
+                            <div className="flex gap-2">
+                                {/* Mock attachments buttons */}
+                            </div>
+                            <button 
+                                onClick={handleAddUpdate}
+                                disabled={!newUpdateText.trim()}
+                                className="bg-primary hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-4 py-1.5 rounded text-sm font-medium transition-colors"
+                            >
+                                Comment
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <textarea 
-                    className="w-full text-sm border-none focus:ring-0 p-0 mb-3 resize-none placeholder:text-slate-400"
-                    placeholder="Write a comment or update..."
-                    rows={2}
-                    value={newUpdateText}
-                    onChange={(e) => setNewUpdateText(e.target.value)}
-                />
-                <div className="flex justify-between items-center border-t border-slate-100 pt-3">
-                    <div className="flex gap-2">
-                        {/* Mock attachments buttons */}
-                    </div>
-                    <button 
-                        onClick={handleAddUpdate}
-                        disabled={!newUpdateText.trim()}
-                        className="bg-primary hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-4 py-1.5 rounded text-sm font-medium transition-colors"
-                    >
-                        Comment
-                    </button>
-                </div>
-             </div>
-          </div>
 
-          <div className="h-20"></div>
-        </div>
+                <div className="h-20"></div>
+                </div>
+            </>
+        ) : (
+            <div className="p-10 flex items-center justify-center h-full">
+                {/* Loading skeleton or blank state when closed/animating out */}
+            </div>
+        )}
       </div>
     </>
   );
