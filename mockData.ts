@@ -1,4 +1,5 @@
-import { Ticket, TicketType, Status, Priority, ProductArea, Platform } from './types';
+
+import { Ticket, TicketType, Status, Priority, ProductArea, Platform, Dealership, DealershipStatus, ReynoldsSolution, FullpathSolution, DMTProduct } from './types';
 import { getTodayDateString } from './utils';
 
 export const mockClients = [
@@ -9,6 +10,21 @@ export const mockClients = [
   "Prestige Worldwide",
   "TechDrive Inc."
 ];
+
+// --- DMT Catalog ---
+export const DMT_PRODUCTS: DMTProduct[] = [
+  // New Category
+  { id: 'p1', code: '15391', name: 'Curator SE', defaultPrice: 8275, category: 'New' },
+  { id: 'p2', code: '15392', name: 'Managed', defaultPrice: 1750, category: 'New' },
+  { id: 'p3', code: '15435', name: 'Addl. Web', defaultPrice: 799, category: 'New' },
+  { id: 'p4', code: '15436', name: 'Manag. Addl. Web', defaultPrice: 799, category: 'New' },
+  // Old Category
+  { id: 'p5', code: '15381', name: 'AA', defaultPrice: 4995, category: 'Old' },
+  { id: 'p6', code: '15382', name: 'SE', defaultPrice: 8275, category: 'Old' },
+  { id: 'p7', code: '15390', name: 'SMS', defaultPrice: 795, category: 'Old' },
+];
+
+// --- Tickets ---
 
 export const createEmptyTicket = (): Ticket => ({
   id: `T-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -154,3 +170,89 @@ export const generateMockTickets = (): Ticket[] => {
     },
   ];
 };
+
+// --- Dealerships ---
+
+export const createEmptyDealership = (): Dealership => ({
+  id: `D-${Math.floor(10000 + Math.random() * 90000)}`,
+  accountNumber: 0,
+  accountName: '',
+  status: DealershipStatus.DMTPending,
+  goLiveDate: '',
+  termDate: '',
+  enterpriseGroup: '',
+  storeNumber: '',
+  branchNumber: '',
+  address: '',
+  websiteLinks: [{ id: Date.now().toString(), url: '', clientId: '' }],
+  equityProvider: 'Fullpath Kelly Blue Book',
+  reynoldsSolutions: [],
+  fullpathSolutions: [],
+  dmtOrders: [],
+  assignedSpecialist: '',
+  salesPerson: '',
+  pocName: '',
+  pocEmail: '',
+  pocPhone: '',
+  lastUpdated: getTodayDateString()
+});
+
+export const generateMockDealerships = (): Dealership[] => {
+  return [
+    {
+      id: 'D-98213',
+      accountNumber: 10245,
+      accountName: 'North Georgia Toyota',
+      status: DealershipStatus.Live,
+      goLiveDate: '01/15/2024',
+      termDate: '01/15/2026',
+      enterpriseGroup: 'Georgia Auto Group',
+      storeNumber: '120',
+      branchNumber: '01',
+      eraSystemId: 4492,
+      ppSysId: 8821,
+      buId: 101,
+      address: '123 Peachtree Ln, Atlanta, GA 30301',
+      websiteLinks: [
+        { id: 'l1', url: 'https://www.northgatoyota.com', clientId: 'NGT-001' }
+      ],
+      equityProvider: 'Fullpath Kelly Blue Book',
+      reynoldsSolutions: [ReynoldsSolution.XTS, ReynoldsSolution.MMS],
+      fullpathSolutions: [FullpathSolution.DigAds, FullpathSolution.VIN],
+      dmtOrders: [
+          { id: 'o1', receivedDate: '01/01/2024', orderNumber: 5521, productId: 'p1', price: 8275, isActive: true },
+          { id: 'o2', receivedDate: '01/01/2024', orderNumber: 5521, productId: 'p2', price: 1750, isActive: true }
+      ],
+      assignedSpecialist: 'Sarah Connor',
+      salesPerson: 'Kyle Reese',
+      pocName: 'Bill Lumbergh',
+      pocEmail: 'bill@ngtoyota.com',
+      pocPhone: '(404) 555-0199',
+      lastUpdated: '05/15/2024'
+    },
+    {
+      id: 'D-55123',
+      accountNumber: 55102,
+      accountName: 'Miami Lakes Automall',
+      status: DealershipStatus.Onboarding,
+      goLiveDate: '06/01/2024',
+      termDate: '',
+      enterpriseGroup: 'Miami Motors',
+      storeNumber: '300',
+      branchNumber: '05',
+      eraSystemId: 9921,
+      address: '500 Ocean Dr, Miami, FL 33101',
+      websiteLinks: [],
+      equityProvider: 'Kelly Blue Book',
+      reynoldsSolutions: [ReynoldsSolution.ADVSVC],
+      fullpathSolutions: [FullpathSolution.WEBEngage],
+      dmtOrders: [],
+      assignedSpecialist: 'Tony Stark',
+      salesPerson: 'Pepper Potts',
+      pocName: 'Happy Hogan',
+      pocEmail: 'happy@miamilakes.com',
+      pocPhone: '(305) 555-0122',
+      lastUpdated: '05/10/2024'
+    }
+  ]
+}

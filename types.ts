@@ -1,3 +1,4 @@
+
 // --- Enums ---
 export enum TicketType { FeatureRequest = 'Feature Request', Issue = 'Issue', Question = 'Question' }
 export enum Status { NotStarted = 'Not Started', InProgress = 'In Progress', PMReview = 'PM Review', DevReview = 'DEV Review', OnHold = 'On Hold', Testing = 'Testing', Completed = 'Completed' }
@@ -61,4 +62,93 @@ export type TicketFilterState = {
   priority: Priority | 'All';
   type: TicketType | 'All';
   productArea: ProductArea | 'All';
+}
+
+// --- Dealership Types ---
+
+export enum DealershipStatus {
+  DMTPending = 'DMT-Pending',
+  DMTApproved = 'DMT-Approved',
+  Onboarding = 'Onboarding',
+  Live = 'Live',
+  Cancelled = 'Cancelled'
+}
+
+export enum ReynoldsSolution {
+  XTS = 'XTS',
+  MMS = 'MMS',
+  TRU = 'TRU',
+  ADVSVC = 'ADVSVC'
+}
+
+export enum FullpathSolution {
+  DigAds = 'DigAds',
+  VIN = 'VIN',
+  WEBEngage = 'WEB Engage',
+  DYN = 'DYN'
+}
+
+export interface WebsiteLink {
+  id: string;
+  url: string;
+  clientId: string;
+}
+
+// DMT Order Types
+export interface DMTProduct {
+  id: string;
+  code: string;
+  name: string;
+  defaultPrice: number;
+  category: 'New' | 'Old';
+}
+
+export interface DMTOrderItem {
+  id: string;
+  receivedDate: string;
+  orderNumber: number;
+  productId: string; // correlates to DMTProduct.id
+  price: number;
+  isActive: boolean;
+}
+
+export interface Dealership {
+  id: string;
+  // Core Info
+  accountNumber: number; // CIF
+  accountName: string;
+  status: DealershipStatus;
+  goLiveDate: string; // MM/DD/YYYY
+  termDate: string; // MM/DD/YYYY
+
+  // Account Details
+  enterpriseGroup: string;
+  storeNumber: string;
+  branchNumber: string;
+  eraSystemId?: number;
+  ppSysId?: number;
+  buId?: number;
+  address: string;
+
+  // Links
+  websiteLinks: WebsiteLink[];
+
+  // Equity
+  equityProvider: string; // Default "Fullpath Kelly Blue Book"
+
+  // Solutions
+  reynoldsSolutions: ReynoldsSolution[];
+  fullpathSolutions: FullpathSolution[];
+
+  // DMT Orders
+  dmtOrders: DMTOrderItem[];
+
+  // Contact
+  assignedSpecialist: string;
+  salesPerson: string;
+  pocName: string;
+  pocEmail: string;
+  pocPhone: string;
+  
+  lastUpdated: string;
 }

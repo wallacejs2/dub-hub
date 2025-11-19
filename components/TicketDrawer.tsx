@@ -1,6 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Ticket, Status, Priority, TicketType, ProductArea, Platform, Update } from '../types';
-import { mockClients } from '../mockData';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { Ticket, Status, Priority, TicketType, ProductArea, Platform, Update, Dealership } from '../types';
 import { getTodayDateString, toInputDate, fromInputDate } from '../utils';
 import { X, Calendar, Copy, Trash2, Edit2, Save, Link as LinkIcon } from 'lucide-react';
 import { useToast } from './Toast';
@@ -12,6 +11,7 @@ interface TicketDrawerProps {
   onUpdate: (ticket: Ticket) => void;
   onDelete: (id: string) => void;
   isNew?: boolean;
+  dealerships: Dealership[];
 }
 
 // --- Styled Components ---
@@ -114,7 +114,7 @@ const getPlatformBadge = (platform: Platform) => {
     return <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${colorClass}`}>{platform}</span>;
 };
 
-export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDelete, isNew = false }: TicketDrawerProps) {
+export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDelete, isNew = false, dealerships }: TicketDrawerProps) {
   const [formData, setFormData] = useState<Ticket | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const { addToast } = useToast();
@@ -140,6 +140,11 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
   const handleChange = (field: keyof Ticket, value: any) => {
     setFormData(prev => prev ? ({ ...prev, [field]: value }) : null);
   };
+
+  const clientOptions = useMemo(() => {
+      const names = dealerships.map(d => d.accountName).sort();
+      return ['All', ...names];
+  }, [dealerships]);
 
   const handleSave = () => {
     if (formData) {
@@ -241,8 +246,12 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
 
   const renderLinkDisplay = (valKey: keyof Ticket, linkKey: keyof Ticket, label: string) => {
       if (!formData) return null;
-      const val = formData[valKey];
-      const link = formData[linkKey];
+      const rawVal = formData[valKey];
+      // Ensure val is string or number for rendering
+      const val = (typeof rawVal === 'string' || typeof rawVal === 'number') ? rawVal : null;
+
+      const rawLink = formData[linkKey];
+      const link = (typeof rawLink === 'string') ? rawLink : undefined;
       
       // If absolutely nothing
       if (!val && !link) return renderField(`${label} Number`, null);
@@ -252,13 +261,13 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
              <FieldLabel>{label} Number</FieldLabel>
              <div className="min-h-[24px] flex items-center text-sm font-medium text-slate-800">
                  {val && link ? (
-                     <a href={link as string} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline hover:text-blue-800 font-semibold transition-colors">
+                     <a href={link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline hover:text-blue-800 font-semibold transition-colors">
                          {val}
                      </a>
                  ) : val ? (
                      <span>{val}</span>
                  ) : (
-                     <a href={link as string} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-xs flex items-center gap-1">
+                     <a href={link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-xs flex items-center gap-1">
                         <LinkIcon size={12}/> Link
                      </a>
                  )}
@@ -407,7 +416,7 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
                     {isEditing ? (
                         <>
                             <div><FieldLabel>Submitter</FieldLabel><Input value={formData.submitterName} onChange={(e: any) => handleChange('submitterName', e.target.value)} /></div>
-                            <div><FieldLabel>Client</FieldLabel><Input value={formData.client} onChange={(e: any) => handleChange('client', e.target.value)} placeholder="Client Name" /></div>
+                            <div><FieldLabel>Client</FieldLabel><Select value={formData.client} options={clientOptions} onChange={(e: any) => handleChange('client', e.target.value)} /></div>
                         </>
                     ) : (
                         <>

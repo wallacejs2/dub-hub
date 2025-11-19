@@ -1,14 +1,25 @@
 import React from 'react';
-import { LayoutDashboard, Ticket, Settings, Bell, Search, User } from 'lucide-react';
+import { LayoutDashboard, Ticket, Settings, Bell, Search, Building2 } from 'lucide-react';
 
-const SidebarItem = ({ icon: Icon, label, active }: { icon: any, label: string, active?: boolean }) => (
-  <div className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${active ? 'bg-gray-700 text-white border-r-4 border-primary' : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'}`}>
+export type ViewMode = 'tickets' | 'dealerships';
+
+const SidebarItem = ({ icon: Icon, label, active, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) => (
+  <div 
+    onClick={onClick}
+    className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${active ? 'bg-gray-700 text-white border-r-4 border-primary' : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'}`}
+  >
     <Icon size={20} />
     <span className="font-medium text-sm">{label}</span>
   </div>
 );
 
-export default function Layout({ children }: { children?: React.ReactNode }) {
+interface LayoutProps {
+  children?: React.ReactNode;
+  currentView: ViewMode;
+  onNavigate: (view: ViewMode) => void;
+}
+
+export default function Layout({ children, currentView, onNavigate }: LayoutProps) {
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
       {/* Sidebar */}
@@ -21,7 +32,18 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
 
         <nav className="flex-1 py-6 space-y-1">
           <SidebarItem icon={LayoutDashboard} label="Dashboard" />
-          <SidebarItem icon={Ticket} label="Tickets" active />
+          <SidebarItem 
+            icon={Ticket} 
+            label="Tickets" 
+            active={currentView === 'tickets'} 
+            onClick={() => onNavigate('tickets')}
+          />
+          <SidebarItem 
+            icon={Building2} 
+            label="Dealerships" 
+            active={currentView === 'dealerships'} 
+            onClick={() => onNavigate('dealerships')}
+          />
           <SidebarItem icon={Settings} label="Settings" />
         </nav>
       </aside>
@@ -30,7 +52,9 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 lg:px-8">
-           <h1 className="text-xl font-semibold text-slate-800">Tickets</h1>
+           <h1 className="text-xl font-semibold text-slate-800">
+             {currentView === 'tickets' ? 'Tickets' : 'Dealerships'}
+           </h1>
            
            <div className="flex items-center gap-4">
              <div className="relative hidden md:block">

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Ticket, Status, Priority, TicketType, ProductArea, Platform } from '../types';
-import { Filter, Trash2, Plus, Star, MapPin, LayoutGrid, Server, Clock, Hash } from 'lucide-react';
+import { Filter, Trash2, Plus, Star, MapPin, LayoutGrid, Server, Clock, Hash, Building2 } from 'lucide-react';
 
 // Helper for Status Colors (Used for Badge and Reason Text)
 const getStatusColorClasses = (status: Status) => {
@@ -374,9 +374,16 @@ export default function TicketList({
 
                     {/* Main Content */}
                     <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <TypeBadge type={ticket.type} />
-                            <span className="hidden sm:inline text-[10px] text-slate-400 font-medium">
+
+                            {/* Client Display */}
+                            <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200" title={`Client: ${ticket.client}`}>
+                                <Building2 size={10} className="text-slate-500" />
+                                <span className="truncate max-w-[150px]">{ticket.client}</span>
+                            </div>
+
+                            <span className="hidden sm:inline text-[10px] text-slate-400 font-medium ml-1">
                                Last updated {ticket.lastUpdatedDate}
                             </span>
                             
@@ -407,6 +414,7 @@ export default function TicketList({
                                 <Server size={12} className="text-current" />
                                 <span>{ticket.platform}</span>
                             </div>
+
                             <div className="flex items-center gap-1.5 text-slate-500" title={`Location: ${ticket.location}`}>
                                 <MapPin size={12} className="text-slate-400" />
                                 <span className="truncate max-w-[150px]">{ticket.location || 'N/A'}</span>
