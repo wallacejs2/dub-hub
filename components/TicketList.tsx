@@ -358,29 +358,29 @@ export default function TicketList({
                 <div 
                     key={ticket.id}
                     className={`
-                        group relative bg-white rounded-lg border p-4 shadow-sm transition-all hover:shadow-md cursor-pointer flex flex-col sm:flex-row sm:items-center gap-4
+                        group relative bg-white rounded-lg border p-4 shadow-sm transition-all hover:shadow-md cursor-pointer flex flex-col gap-2
                         ${selectedTicketIds.has(ticket.id) ? 'border-primary ring-1 ring-primary bg-blue-50/30' : 'border-slate-200 hover:border-slate-300'}
                     `}
                     onClick={() => onOpenTicket(ticket.id)}
                 >
-                    {/* Selection Checkbox */}
-                    <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
-                        <input 
-                            type="checkbox" 
-                            className="rounded border-slate-300 text-primary focus:ring-primary cursor-pointer w-4 h-4 ml-1"
-                            checked={selectedTicketIds.has(ticket.id)}
-                            onChange={(e) => handleSelectOne(ticket.id, e.target.checked)}
-                        />
-                    </div>
+                    {/* Top Row: Info Left & Status Right */}
+                    <div className="flex justify-between items-start w-full">
+                        {/* Left Group: Checkbox, Type, Client, Meta */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                             {/* Selection Checkbox */}
+                             <div className="flex items-center mr-1" onClick={(e) => e.stopPropagation()}>
+                                <input 
+                                    type="checkbox" 
+                                    className="rounded border-slate-300 text-primary focus:ring-primary cursor-pointer w-4 h-4"
+                                    checked={selectedTicketIds.has(ticket.id)}
+                                    onChange={(e) => handleSelectOne(ticket.id, e.target.checked)}
+                                />
+                            </div>
 
-                    {/* Main Content */}
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <TypeBadge type={ticket.type} />
 
                             {/* Client Display */}
-                            <div className="flex items-center gap-1 text-[10px] text-slate-500 font-medium ml-1" title={`Client: ${ticket.client}`}>
-                                <Building2 size={10} className="text-slate-400" />
+                            <div className="flex items-center gap-1 text-[10px] text-slate-400 font-normal ml-1" title={`Client: ${ticket.client}`}>
                                 <span className="truncate max-w-[150px]">{ticket.client}</span>
                             </div>
 
@@ -396,10 +396,34 @@ export default function TicketList({
                                 </div>
                             )}
                         </div>
-                        
+
+                        {/* Right Group: Status, Priority, Favorite */}
+                        <div className="flex items-center gap-2 shrink-0 ml-2">
+                             <StatusBadge status={ticket.status} />
+                             <PriorityBadge priority={ticket.priority} />
+                             <button 
+                                onClick={(e) => onToggleFavorite(ticket.id, e)}
+                                className={`p-1 rounded-full transition-colors hover:bg-slate-100 ${ticket.isFavorite ? 'text-yellow-400' : 'text-slate-200 group-hover:text-slate-300'}`}
+                            >
+                                <Star size={16} fill={ticket.isFavorite ? "currentColor" : "none"} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Main Content Body */}
+                    <div className="pl-6 sm:pl-7"> 
                         <h3 className="font-bold text-slate-800 text-base leading-snug truncate" title={ticket.title}>
                             {ticket.title}
                         </h3>
+                        
+                        {/* Status Reason (Boxed matching Status Color) */}
+                        {ticket.reason && (
+                            <div className="mt-1.5 mb-1">
+                                <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-medium border border-transparent ${getStatusColorClasses(ticket.status).bg} ${getStatusColorClasses(ticket.status).text}`}>
+                                    {ticket.reason}
+                                </span>
+                            </div>
+                        )}
 
                         {/* Summary Display */}
                         {ticket.summary && (
@@ -440,33 +464,6 @@ export default function TicketList({
                                 <ReferenceBadge label="CPM" value={ticket.cpmNumber.toString()} link={ticket.cpmLink} />
                             )}
                         </div>
-                    </div>
-
-                    {/* Status & Priority (Right Side) */}
-                    <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-1.5 mt-2 sm:mt-0 border-t sm:border-0 border-slate-100 pt-2 sm:pt-0">
-                         <div className="flex gap-2">
-                             <StatusBadge status={ticket.status} />
-                             <PriorityBadge priority={ticket.priority} />
-                         </div>
-                         
-                         {/* Status Reason */}
-                         {ticket.reason && (
-                             <span className={`text-[11px] font-semibold mt-1 max-w-[180px] truncate ${getStatusColorClasses(ticket.status).text}`}>
-                                 {ticket.reason}
-                             </span>
-                         )}
-
-                         <div className="flex items-center gap-2 mt-1">
-                            <span className="sm:hidden text-[10px] text-slate-400 font-medium">
-                               Updated {ticket.lastUpdatedDate}
-                            </span>
-                             <button 
-                                onClick={(e) => onToggleFavorite(ticket.id, e)}
-                                className={`p-1.5 rounded-full transition-colors hover:bg-slate-100 ${ticket.isFavorite ? 'text-yellow-400' : 'text-slate-200 group-hover:text-slate-300'}`}
-                            >
-                                <Star size={16} fill={ticket.isFavorite ? "currentColor" : "none"} />
-                            </button>
-                         </div>
                     </div>
                 </div>
             ))
