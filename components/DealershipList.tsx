@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Dealership, DealershipStatus } from '../types';
-import { Filter, Plus, Building2, Hash, Calendar, Server } from 'lucide-react';
+import { Filter, Plus, Building2 } from 'lucide-react';
 
 const StatusBadge = ({ status }: { status: DealershipStatus }) => {
     const colors = {
@@ -121,7 +121,7 @@ export default function DealershipList({
                                 {/* Header: CIF - Account Name */}
                                 <div className="flex items-center gap-2 mb-2">
                                     <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs font-bold font-mono">
-                                        <Building2 size={12} /> CIF: {dealership.accountNumber}
+                                         {dealership.accountNumber}
                                     </div>
                                     <h3 className="font-bold text-slate-800 text-lg">{dealership.accountName}</h3>
                                 </div>
@@ -130,26 +130,26 @@ export default function DealershipList({
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-3 text-xs text-slate-600">
                                     <div className="flex flex-col">
                                         <span className="uppercase font-bold text-[10px] text-slate-400 mb-0.5">PPSysID</span>
-                                        <span className="font-medium flex items-center gap-1">
-                                            <Hash size={10} /> {dealership.ppSysId || 'N/A'}
+                                        <span className="font-medium">
+                                             {dealership.ppSysId || 'N/A'}
                                         </span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="uppercase font-bold text-[10px] text-slate-400 mb-0.5">Store / Branch</span>
-                                        <span className="font-medium flex items-center gap-1">
-                                            <Building2 size={10} /> {dealership.storeNumber || '-'} / {dealership.branchNumber || '-'}
+                                        <span className="font-medium">
+                                             {dealership.storeNumber || '-'} / {dealership.branchNumber || '-'}
                                         </span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="uppercase font-bold text-[10px] text-slate-400 mb-0.5">ERA ID</span>
-                                        <span className="font-medium flex items-center gap-1">
-                                            <Server size={10} /> {dealership.eraSystemId || 'N/A'}
+                                        <span className="font-medium">
+                                             {dealership.eraSystemId || 'N/A'}
                                         </span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="uppercase font-bold text-[10px] text-slate-400 mb-0.5">Go-Live</span>
-                                        <span className="font-medium flex items-center gap-1">
-                                            <Calendar size={10} /> {dealership.goLiveDate || 'Pending'}
+                                        <span className="font-medium">
+                                             {dealership.goLiveDate || 'Pending'}
                                         </span>
                                     </div>
                                 </div>

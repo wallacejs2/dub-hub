@@ -610,6 +610,17 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
                         </div>
                     </div>
 
+                    {isNew && (
+                        <div className="mt-8 flex justify-end border-t border-slate-100 pt-6">
+                            <button 
+                                onClick={handleSave}
+                                className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded shadow-md transition-all hover:shadow-lg w-full justify-center sm:w-auto"
+                            >
+                                <Plus size={18} /> Add Dealership
+                            </button>
+                        </div>
+                    )}
+
                     <div className="h-20"></div>
                 </div>
             </>
