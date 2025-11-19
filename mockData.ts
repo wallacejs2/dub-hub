@@ -1,5 +1,5 @@
 
-import { Ticket, TicketType, Status, Priority, ProductArea, Platform, Dealership, DealershipStatus, ReynoldsSolution, FullpathSolution, DMTProduct, CRMProvider } from './types';
+import { Ticket, TicketType, Status, Priority, ProductArea, Platform, Dealership, DealershipStatus, ReynoldsSolution, FullpathSolution, DMTProduct, CRMProvider, Resource, ResourceCategory, ResourceScope } from './types';
 import { getTodayDateString } from './utils';
 
 export const mockClients = [
@@ -259,3 +259,63 @@ export const generateMockDealerships = (): Dealership[] => {
     }
   ]
 }
+
+// --- Resources ---
+
+export const createEmptyResource = (): Resource => ({
+  id: `R-${Math.floor(1000 + Math.random() * 9000)}`,
+  title: '',
+  date: getTodayDateString(),
+  version: 'v1.0',
+  category: ResourceCategory.PDF,
+  scope: ResourceScope.Internal,
+  topics: '',
+  description: '',
+  linkUrl: '',
+  navigationPath: '',
+  lastUpdated: getTodayDateString()
+});
+
+export const generateMockResources = (): Resource[] => {
+  return [
+    {
+      id: 'R-101',
+      title: 'Integration Guide - Fullpath',
+      date: '01/10/2024',
+      version: 'v2.1',
+      category: ResourceCategory.PDF,
+      scope: ResourceScope.External,
+      topics: 'Integration, API, Setup',
+      description: 'Complete guide for integrating Fullpath services with the Dealer Management System.',
+      linkUrl: 'https://example.com/guide.pdf',
+      navigationPath: 'Docs > Integrations',
+      lastUpdated: '02/15/2024'
+    },
+    {
+      id: 'R-102',
+      title: 'Q1 2024 Sales Deck',
+      date: '03/01/2024',
+      version: 'v1.0',
+      category: ResourceCategory.PPT,
+      scope: ResourceScope.Internal,
+      topics: 'Sales, Marketing, Quarterly Review',
+      description: 'Presentation deck for the Q1 sales review meeting.',
+      linkUrl: 'https://example.com/deck.ppt',
+      navigationPath: 'Sales > Decks',
+      lastUpdated: '03/01/2024'
+    },
+    {
+      id: 'R-103',
+      title: 'Inventory Schema Specification',
+      date: '12/05/2023',
+      version: 'v3.0',
+      category: ResourceCategory.XML,
+      scope: ResourceScope.External,
+      topics: 'Schema, Data, Inventory',
+      description: 'Technical specification for the XML inventory data feed.',
+      linkUrl: 'https://example.com/schema.xml',
+      navigationPath: 'Tech > Specs',
+      lastUpdated: '12/05/2023'
+    }
+  ];
+};

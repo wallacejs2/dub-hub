@@ -1,7 +1,8 @@
-import React from 'react';
-import { LayoutDashboard, Ticket, Settings, Bell, Search, Building2 } from 'lucide-react';
 
-export type ViewMode = 'tickets' | 'dealerships';
+import React from 'react';
+import { LayoutDashboard, Ticket, Settings, Bell, Search, Building2, FileText } from 'lucide-react';
+
+export type ViewMode = 'tickets' | 'dealerships' | 'resources';
 
 const SidebarItem = ({ icon: Icon, label, active, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) => (
   <div 
@@ -44,6 +45,12 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
             active={currentView === 'dealerships'} 
             onClick={() => onNavigate('dealerships')}
           />
+          <SidebarItem 
+            icon={FileText} 
+            label="Resources" 
+            active={currentView === 'resources'} 
+            onClick={() => onNavigate('resources')}
+          />
           <SidebarItem icon={Settings} label="Settings" />
         </nav>
       </aside>
@@ -53,7 +60,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
         {/* Header */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 lg:px-8">
            <h1 className="text-xl font-semibold text-slate-800">
-             {currentView === 'tickets' ? 'Tickets' : 'Dealerships'}
+             {currentView === 'tickets' ? 'Tickets' : currentView === 'dealerships' ? 'Dealerships' : 'Resources'}
            </h1>
            
            <div className="flex items-center gap-4">

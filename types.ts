@@ -166,3 +166,31 @@ export interface Dealership {
   
   lastUpdated: string;
 }
+
+// --- Resource Types ---
+
+export enum ResourceCategory {
+  PPT = 'PPT',
+  DOC = 'DOC',
+  XML = 'XML',
+  PDF = 'PDF'
+}
+
+export enum ResourceScope {
+  Internal = 'Internal',
+  External = 'External'
+}
+
+export interface Resource {
+  id: string;
+  title: string;
+  date: string; // MM/DD/YYYY
+  version: string;
+  category: ResourceCategory;
+  scope: ResourceScope;
+  topics: string; // Comma separated text
+  description: string;
+  linkUrl: string;
+  navigationPath: string;
+  lastUpdated: string;
+}
