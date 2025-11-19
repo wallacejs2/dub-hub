@@ -395,7 +395,7 @@ export default function TicketList({
 
                         {/* Summary Display */}
                         {ticket.summary && (
-                             <p className="text-sm text-slate-500 mt-1 line-clamp-2">{ticket.summary}</p>
+                             <p className="text-xs text-slate-500 italic mt-1 line-clamp-2">{ticket.summary}</p>
                         )}
 
                         <div className="flex items-center gap-4 mt-2 text-xs text-slate-600">
