@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Ticket, Status, TicketFilterState, TicketType, Priority, ProductArea, Update, Dealership } from './types';
 import { generateMockTickets, createEmptyTicket, generateMockDealerships, createEmptyDealership } from './mockData';
@@ -42,8 +43,17 @@ function AppContent() {
       try {
           const savedData = localStorage.getItem('dubhub-dealerships');
           if (savedData) {
-              // Simple hydration for now, could add schema migration if needed later
-              return JSON.parse(savedData);
+              const parsedData = JSON.parse(savedData);
+              const empty = createEmptyDealership();
+              // Robust hydration: Merge saved object with empty template to ensure new fields (like dmtOrders) exist
+              return parsedData.map((d: any) => ({
+                  ...empty,
+                  ...d,
+                  websiteLinks: d.websiteLinks || [],
+                  reynoldsSolutions: d.reynoldsSolutions || [],
+                  fullpathSolutions: d.fullpathSolutions || [],
+                  dmtOrders: d.dmtOrders || []
+              }));
           }
       } catch (error) {
           console.error("Failed to parse dealership data:", error);
