@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Ticket, Status, Priority, TicketType, ProductArea, Platform } from '../types';
-import { Filter, Trash2, Plus, Star, MapPin, LayoutGrid, Server, Clock } from 'lucide-react';
+import { Filter, Trash2, Plus, Star, MapPin, LayoutGrid, Server, Clock, Hash } from 'lucide-react';
 
 // Helper for Status Colors (Used for Badge and Reason Text)
 const getStatusColorClasses = (status: Status) => {
@@ -68,6 +68,38 @@ const getPlatformColor = (platform: Platform) => {
     }
 };
 
+// Helper Component for Reference Badges (PMR, etc.)
+const ReferenceBadge = ({ label, value, link }: { label: string, value: string | number, link?: string }) => {
+  const content = (
+    <>
+      <Hash size={10} /> {label}: {value}
+    </>
+  );
+  
+  const baseClasses = "inline-flex items-center gap-1 px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-medium rounded border border-slate-200 transition-colors";
+  
+  if (link) {
+    return (
+      <a 
+        href={link} 
+        target="_blank" 
+        rel="noreferrer"
+        onClick={(e) => e.stopPropagation()} // Prevent drawer opening when clicking the link
+        className={`${baseClasses} hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200`}
+        title={`Open ${label} Link`}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <span className={baseClasses}>
+      {content}
+    </span>
+  );
+};
+
 interface TicketListProps {
   tickets: Ticket[];
   selectedTicketIds: Set<string>;
@@ -129,7 +161,10 @@ export default function TicketList({
       const searchLower = filters.search.toLowerCase();
       const matchesSearch =
         ticket.title.toLowerCase().includes(searchLower) ||
-        ticket.id.toLowerCase().includes(searchLower);
+        ticket.id.toLowerCase().includes(searchLower) ||
+        (ticket.pmrNumber && ticket.pmrNumber.toString().includes(searchLower)) ||
+        (ticket.fpTicketNumber && ticket.fpTicketNumber.toString().includes(searchLower));
+        
       if (!matchesSearch) return false;
 
       // Dropdown Filters
@@ -353,9 +388,16 @@ export default function TicketList({
                                 </div>
                             )}
                         </div>
+                        
                         <h3 className="font-bold text-slate-800 text-base leading-snug truncate" title={ticket.title}>
                             {ticket.title}
                         </h3>
+
+                        {/* Summary Display */}
+                        {ticket.summary && (
+                             <p className="text-sm text-slate-500 mt-1 line-clamp-2">{ticket.summary}</p>
+                        )}
+
                         <div className="flex items-center gap-4 mt-2 text-xs text-slate-600">
                             <div className={`flex items-center gap-1.5 font-medium ${getProductAreaColor(ticket.productArea)}`} title={`Area: ${ticket.productArea}`}>
                                 <LayoutGrid size={12} className="text-current" />
@@ -369,6 +411,25 @@ export default function TicketList({
                                 <MapPin size={12} className="text-slate-400" />
                                 <span className="truncate max-w-[150px]">{ticket.location || 'N/A'}</span>
                             </div>
+                        </div>
+
+                        {/* External Reference Tags */}
+                        <div className="flex flex-wrap gap-2 mt-2.5">
+                            {ticket.fpTicketNumber && (
+                                <ReferenceBadge label="FP" value={ticket.fpTicketNumber.toString()} />
+                            )}
+                            {ticket.ticketThreadId && (
+                                <ReferenceBadge label="Thread" value={ticket.ticketThreadId} />
+                            )}
+                            {ticket.pmrNumber && (
+                                <ReferenceBadge label="PMR" value={ticket.pmrNumber.toString()} link={ticket.pmrLink} />
+                            )}
+                            {ticket.pmgNumber && (
+                                <ReferenceBadge label="PMG" value={ticket.pmgNumber.toString()} link={ticket.pmgLink} />
+                            )}
+                            {ticket.cpmNumber && (
+                                <ReferenceBadge label="CPM" value={ticket.cpmNumber.toString()} link={ticket.cpmLink} />
+                            )}
                         </div>
                     </div>
 
