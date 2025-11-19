@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Ticket, Status, Priority, TicketType, ProductArea, Platform } from '../types';
 import { Filter, Trash2, Plus, Star, MapPin, LayoutGrid, Server, Clock, Hash, Building2 } from 'lucide-react';
@@ -378,8 +379,8 @@ export default function TicketList({
                             <TypeBadge type={ticket.type} />
 
                             {/* Client Display */}
-                            <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200" title={`Client: ${ticket.client}`}>
-                                <Building2 size={10} className="text-slate-500" />
+                            <div className="flex items-center gap-1 text-[10px] text-slate-500 font-medium ml-1" title={`Client: ${ticket.client}`}>
+                                <Building2 size={10} className="text-slate-400" />
                                 <span className="truncate max-w-[150px]">{ticket.client}</span>
                             </div>
 

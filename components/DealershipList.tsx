@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useMemo } from 'react';
 import { Dealership, DealershipStatus } from '../types';
 import { Filter, Plus, Building2, Hash, Calendar, Server } from 'lucide-react';
 
@@ -19,23 +20,71 @@ interface DealershipListProps {
   onAddDealership: () => void;
 }
 
+type TabType = 'Active' | 'Cancelled';
+
 export default function DealershipList({
   dealerships,
   onOpenDealership,
   onAddDealership
 }: DealershipListProps) {
   const [filter, setFilter] = useState('');
+  const [activeTab, setActiveTab] = useState<TabType>('Active');
 
-  const filteredDealerships = dealerships.filter(d => 
-    d.accountName.toLowerCase().includes(filter.toLowerCase()) ||
-    d.accountNumber.toString().includes(filter) ||
-    d.storeNumber.toLowerCase().includes(filter)
-  );
+  // --- Counts ---
+  const counts = useMemo(() => {
+      const cancelled = dealerships.filter(d => d.status === DealershipStatus.Cancelled).length;
+      const active = dealerships.length - cancelled;
+      return { active, cancelled };
+  }, [dealerships]);
+
+  // --- Filter Logic ---
+  const filteredDealerships = useMemo(() => {
+    return dealerships.filter(d => {
+        // 1. Tab Filter
+        if (activeTab === 'Active') {
+            if (d.status === DealershipStatus.Cancelled) return false;
+        } else {
+            if (d.status !== DealershipStatus.Cancelled) return false;
+        }
+
+        // 2. Search Filter
+        if (filter) {
+            const searchLower = filter.toLowerCase();
+            const matches = 
+                d.accountName.toLowerCase().includes(searchLower) ||
+                d.accountNumber.toString().includes(filter) ||
+                (d.storeNumber && d.storeNumber.toLowerCase().includes(filter));
+            if (!matches) return false;
+        }
+
+        return true;
+    });
+  }, [dealerships, activeTab, filter]);
 
   return (
     <div className="space-y-6 pb-10">
-        {/* Header & Actions */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+        
+        {/* Tabs & Actions Container */}
+        <div className="flex flex-col space-y-4 border-b border-slate-200 pb-0">
+            {/* Tabs */}
+            <nav className="-mb-px flex space-x-8">
+                <button
+                    onClick={() => setActiveTab('Active')}
+                    className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'Active' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}`}
+                >
+                    Active ({counts.active})
+                </button>
+                <button
+                    onClick={() => setActiveTab('Cancelled')}
+                    className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'Cancelled' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}`}
+                >
+                    Cancelled ({counts.cancelled})
+                </button>
+            </nav>
+        </div>
+
+        {/* Search & Add Button */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="relative max-w-md w-full">
                 <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
                 <input
@@ -58,7 +107,7 @@ export default function DealershipList({
         <div className="flex flex-col space-y-3">
             {filteredDealerships.length === 0 ? (
                 <div className="text-center py-12 text-slate-500 bg-white rounded-lg border border-slate-200 border-dashed">
-                    No dealerships found.
+                    No {activeTab.toLowerCase()} dealerships found matching your criteria.
                 </div>
             ) : (
                 filteredDealerships.map((dealership) => (
