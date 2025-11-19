@@ -37,9 +37,9 @@ export default function DealershipList({
       return { active, cancelled };
   }, [dealerships]);
 
-  // --- Filter Logic ---
+  // --- Filter & Sort Logic ---
   const filteredDealerships = useMemo(() => {
-    return dealerships.filter(d => {
+    const result = dealerships.filter(d => {
         // 1. Tab Filter
         if (activeTab === 'Active') {
             if (d.status === DealershipStatus.Cancelled) return false;
@@ -59,6 +59,10 @@ export default function DealershipList({
 
         return true;
     });
+
+    // Sort Alphabetically by Account Name
+    return result.sort((a, b) => a.accountName.localeCompare(b.accountName));
+
   }, [dealerships, activeTab, filter]);
 
   return (
