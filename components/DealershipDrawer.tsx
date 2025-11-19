@@ -57,7 +57,7 @@ const Select = ({ value, onChange, options }: any) => (
 const renderField = (label: string, content: React.ReactNode) => (
     <div className="mb-1">
         <FieldLabel>{label}</FieldLabel>
-        <div className="min-h-[24px] flex items-center text-sm font-medium text-slate-800">
+        <div className="min-h-[24px] flex items-center text-sm font-normal text-slate-800">
           {content || <span className="text-slate-400 text-xs italic">Empty</span>}
         </div>
     </div>
@@ -341,7 +341,7 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
                                     {isEditing ? (
                                         <Input value={link.url} onChange={(e: any) => handleLinkChange(link.id, 'url', e.target.value)} placeholder="https://..." />
                                     ) : (
-                                        <div className="min-h-[24px] flex items-center text-sm font-medium">
+                                        <div className="min-h-[24px] flex items-center text-sm font-normal">
                                             {link.url ? (
                                                 <a href={link.url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline flex items-center gap-1">
                                                     {link.url} <ExternalLink size={12}/>
@@ -355,7 +355,7 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
                                     {isEditing ? (
                                         <Input value={link.clientId} onChange={(e: any) => handleLinkChange(link.id, 'clientId', e.target.value)} placeholder="ID" />
                                     ) : (
-                                        <div className="min-h-[24px] flex items-center text-sm font-medium text-slate-800 bg-slate-100 px-2 rounded w-fit">
+                                        <div className="min-h-[24px] flex items-center text-sm font-normal text-slate-800 bg-slate-100 px-2 rounded w-fit">
                                             {link.clientId}
                                         </div>
                                     )}
@@ -504,7 +504,7 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
                                                     onChange={(e) => handleOrderChange(order.id, 'receivedDate', fromInputDate(e.target.value))}
                                                 />
                                             ) : (
-                                                <span className="text-slate-600">{order.receivedDate}</span>
+                                                <span className="text-slate-600 font-normal">{order.receivedDate}</span>
                                             )}
 
                                             {/* Order Number */}
@@ -517,7 +517,7 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
                                                     placeholder="#"
                                                 />
                                             ) : (
-                                                <span className="text-slate-800 font-mono">{order.orderNumber}</span>
+                                                <span className="text-slate-800 font-mono font-normal">{order.orderNumber}</span>
                                             )}
 
                                             {/* Product */}
@@ -540,7 +540,7 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
                                                     </optgroup>
                                                 </select>
                                             ) : (
-                                                <span className="text-slate-800 font-medium">
+                                                <span className="text-slate-800 font-normal">
                                                     {selectedProduct ? `${selectedProduct.code} | ${selectedProduct.name}` : 'Unknown Product'}
                                                 </span>
                                             )}
@@ -557,7 +557,7 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
                                                     />
                                                 </div>
                                             ) : (
-                                                <span className="text-slate-600 font-mono">${order.price.toLocaleString()}</span>
+                                                <span className="text-slate-600 font-mono font-normal">${order.price.toLocaleString()}</span>
                                             )}
 
                                             {/* Active Toggle */}
