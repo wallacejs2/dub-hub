@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Ticket, Status, Priority, TicketType, ProductArea, Platform, Update, Dealership } from '../types';
 import { getTodayDateString, toInputDate, fromInputDate } from '../utils';
@@ -545,9 +544,9 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
                             </div>
                         </div>
                         <textarea 
-                            className="w-full text-sm border-none focus:ring-0 p-0 mb-3 resize-none placeholder:text-slate-400"
+                            className="w-full text-sm border-none focus:ring-0 p-0 mb-3 resize-y placeholder:text-slate-400"
                             placeholder="Write a comment or update..."
-                            rows={2}
+                            rows={6}
                             value={newUpdateText}
                             onChange={(e) => setNewUpdateText(e.target.value)}
                         />
