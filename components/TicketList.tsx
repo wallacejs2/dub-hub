@@ -1,19 +1,19 @@
 
 import React, { useState, useMemo } from 'react';
 import { Ticket, Status, Priority, TicketType, ProductArea, Platform } from '../types';
-import { Filter, Trash2, Plus, Star, MapPin, LayoutGrid, Server, Clock, Hash, Building2 } from 'lucide-react';
+import { Filter, Trash2, Plus, Star, MapPin, LayoutGrid, Server, Clock, Hash, Building2, Calendar } from 'lucide-react';
 
 // Helper for Status Colors (Used for Badge and Reason Text)
 const getStatusColorClasses = (status: Status) => {
   switch (status) {
-    case Status.NotStarted: return { bg: 'bg-gray-100', text: 'text-gray-700' };
-    case Status.InProgress: return { bg: 'bg-blue-100', text: 'text-blue-700' };
-    case Status.PMReview: return { bg: 'bg-purple-100', text: 'text-purple-700' };
-    case Status.DevReview: return { bg: 'bg-indigo-100', text: 'text-indigo-700' };
-    case Status.Testing: return { bg: 'bg-orange-100', text: 'text-orange-700' };
-    case Status.Completed: return { bg: 'bg-green-100', text: 'text-green-700' };
-    case Status.OnHold: return { bg: 'bg-red-50', text: 'text-red-700' };
-    default: return { bg: 'bg-gray-100', text: 'text-gray-700' };
+    case Status.NotStarted: return { bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-200' };
+    case Status.InProgress: return { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' };
+    case Status.PMReview: return { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' };
+    case Status.DevReview: return { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200' };
+    case Status.Testing: return { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' };
+    case Status.Completed: return { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' };
+    case Status.OnHold: return { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200' };
+    default: return { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200' };
   }
 };
 
@@ -21,7 +21,7 @@ const getStatusColorClasses = (status: Status) => {
 const StatusBadge = ({ status }: { status: Status }) => {
   const colors = getStatusColorClasses(status);
   return (
-    <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${colors.bg} ${colors.text}`}>
+    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide border ${colors.bg} ${colors.text} ${colors.border}`}>
       {status}
     </span>
   );
@@ -29,13 +29,13 @@ const StatusBadge = ({ status }: { status: Status }) => {
 
 const PriorityBadge = ({ priority }: { priority: Priority }) => {
   const colors = {
-    [Priority.P1]: 'bg-red-100 text-red-700',    // P1 Red
-    [Priority.P2]: 'bg-yellow-100 text-yellow-800', // P2 Yellow
-    [Priority.P3]: 'bg-green-100 text-green-700', // P3 Green
-    [Priority.P4]: 'bg-blue-100 text-blue-700',   // P4 Blue
+    [Priority.P1]: 'bg-red-50 text-red-700 border-red-200',    // P1 Red
+    [Priority.P2]: 'bg-yellow-50 text-yellow-700 border-yellow-200', // P2 Yellow
+    [Priority.P3]: 'bg-emerald-50 text-emerald-700 border-emerald-200', // P3 Green
+    [Priority.P4]: 'bg-blue-50 text-blue-700 border-blue-200',   // P4 Blue
   };
   return (
-    <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${colors[priority]} border-transparent`}>
+    <span className={`px-2 py-0.5 rounded text-[11px] font-bold border ${colors[priority]}`}>
       {priority}
     </span>
   );
@@ -43,11 +43,11 @@ const PriorityBadge = ({ priority }: { priority: Priority }) => {
 
 const TypeBadge = ({ type }: { type: TicketType }) => {
     const colors = {
-        [TicketType.FeatureRequest]: 'text-emerald-600 bg-emerald-50',
-        [TicketType.Issue]: 'text-rose-600 bg-rose-50',
-        [TicketType.Question]: 'text-blue-600 bg-blue-50',
+        [TicketType.FeatureRequest]: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+        [TicketType.Issue]: 'text-rose-600 bg-rose-50 border-rose-100',
+        [TicketType.Question]: 'text-blue-600 bg-blue-50 border-blue-100',
     }
-    return <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${colors[type]}`}>{type}</span>;
+    return <span className={`px-2 py-0.5 rounded-md text-[11px] font-bold border ${colors[type]}`}>{type}</span>;
 };
 
 // Helper for Product Area Colors
@@ -55,7 +55,7 @@ const getProductAreaColor = (area: ProductArea) => {
     switch (area) {
         case ProductArea.Fullpath: return 'text-orange-600'; // Orange
         case ProductArea.Reynolds: return 'text-blue-900';   // Navy Blue
-        default: return 'text-slate-400';
+        default: return 'text-slate-500';
     }
 };
 
@@ -65,7 +65,7 @@ const getPlatformColor = (platform: Platform) => {
         case Platform.FOCUS: return 'text-orange-600'; // Orange
         case Platform.UCP: return 'text-blue-600';     // Blue
         case Platform.Curator: return 'text-purple-600'; // Purple
-        default: return 'text-slate-400';
+        default: return 'text-slate-500';
     }
 };
 
@@ -73,11 +73,11 @@ const getPlatformColor = (platform: Platform) => {
 const ReferenceBadge = ({ label, value, link }: { label: string, value: string | number, link?: string }) => {
   const content = (
     <>
-      <Hash size={10} /> {label}: {value}
+      <Hash size={10} className="opacity-50" /> <span className="font-semibold">{label}:</span> {value}
     </>
   );
   
-  const baseClasses = "inline-flex items-center gap-1 px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-medium rounded border border-slate-200 transition-colors";
+  const baseClasses = "inline-flex items-center gap-1 px-1.5 py-0.5 bg-white text-slate-600 text-[10px] rounded border border-slate-200 transition-all shadow-sm";
   
   if (link) {
     return (
@@ -86,10 +86,11 @@ const ReferenceBadge = ({ label, value, link }: { label: string, value: string |
         target="_blank" 
         rel="noreferrer"
         onClick={(e) => e.stopPropagation()} // Prevent drawer opening when clicking the link
-        className={`${baseClasses} hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200`}
+        className={`${baseClasses} hover:border-blue-300 hover:text-blue-600 hover:shadow-md cursor-pointer group/link`}
         title={`Open ${label} Link`}
       >
         {content}
+        <ExternalLinkIcon size={8} className="opacity-0 group-hover/link:opacity-100 transition-opacity" />
       </a>
     );
   }
@@ -100,6 +101,25 @@ const ReferenceBadge = ({ label, value, link }: { label: string, value: string |
     </span>
   );
 };
+
+const ExternalLinkIcon = ({ size = 10, className = "" }: { size?: number, className?: string }) => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width={size} 
+        height={size} 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        className={className}
+    >
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+        <polyline points="15 3 21 3 21 9"></polyline>
+        <line x1="10" y1="14" x2="21" y2="3"></line>
+    </svg>
+);
 
 interface TicketListProps {
   tickets: Ticket[];
@@ -348,9 +368,9 @@ export default function TicketList({
       </div>
 
       {/* Ticket Stack (Vertical List) */}
-      <div className="flex flex-col space-y-3">
+      <div className="flex flex-col space-y-4">
         {filteredTickets.length === 0 ? (
-            <div className="text-center py-12 text-slate-500 bg-white rounded-lg border border-slate-200 border-dashed">
+            <div className="text-center py-16 text-slate-400 bg-white rounded-xl border border-slate-200 border-dashed">
                 No tickets found matching your criteria.
             </div>
         ) : (
@@ -358,17 +378,15 @@ export default function TicketList({
                 <div 
                     key={ticket.id}
                     className={`
-                        group relative bg-white rounded-lg border p-4 shadow-sm transition-all hover:shadow-md cursor-pointer flex flex-col gap-2
-                        ${selectedTicketIds.has(ticket.id) ? 'border-primary ring-1 ring-primary bg-blue-50/30' : 'border-slate-200 hover:border-slate-300'}
+                        group relative bg-white rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md cursor-pointer flex flex-col
+                        ${selectedTicketIds.has(ticket.id) ? 'border-primary ring-1 ring-primary bg-blue-50/30' : 'border-slate-200 hover:border-blue-200'}
                     `}
                     onClick={() => onOpenTicket(ticket.id)}
                 >
-                    {/* Top Row: Info Left & Status Right */}
-                    <div className="flex justify-between items-start w-full">
-                        {/* Left Group: Checkbox, Type, Client, Meta */}
-                        <div className="flex items-center gap-2 flex-wrap">
-                             {/* Selection Checkbox */}
-                             <div className="flex items-center mr-1" onClick={(e) => e.stopPropagation()}>
+                    {/* Header Row: Checkbox/Type/Client/Area/Platform/Location (Left) -- Status/Priority (Right) */}
+                    <div className="flex justify-between items-start mb-3">
+                        <div className="flex flex-wrap items-center gap-3">
+                            <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
                                 <input 
                                     type="checkbox" 
                                     className="rounded border-slate-300 text-primary focus:ring-primary cursor-pointer w-4 h-4"
@@ -376,50 +394,58 @@ export default function TicketList({
                                     onChange={(e) => handleSelectOne(ticket.id, e.target.checked)}
                                 />
                             </div>
-
+                            
                             <TypeBadge type={ticket.type} />
 
                             {/* Client Display */}
-                            <div className="flex items-center gap-1 text-[10px] text-slate-400 font-normal ml-1" title={`Client: ${ticket.client}`}>
-                                <span className="truncate max-w-[150px]">{ticket.client}</span>
+                            <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium px-2 py-0.5 bg-slate-50 rounded border border-slate-100" title={`Client: ${ticket.client}`}>
+                                <Building2 size={12} className="text-slate-400" />
+                                <span className="truncate max-w-[180px]">{ticket.client}</span>
                             </div>
 
-                            <span className="hidden sm:inline text-[10px] text-slate-400 font-medium ml-1">
-                               Last updated {ticket.lastUpdatedDate}
-                            </span>
+                            {/* Product Area */}
+                            <div className={`flex items-center gap-1.5 text-xs font-semibold ${getProductAreaColor(ticket.productArea)}`}>
+                                <LayoutGrid size={14} className="text-current opacity-75" />
+                                <span>{ticket.productArea}</span>
+                            </div>
                             
-                            {/* Days Active Calculation */}
-                            {getDaysActive(ticket.startDate) !== null && (
-                                <div className="hidden sm:flex items-center text-[10px] text-slate-400 font-medium border-l border-slate-300 pl-2 ml-2 gap-1">
-                                    <Clock size={10} />
-                                    <span>{getDaysActive(ticket.startDate)} Days Active</span>
+                            {/* Platform */}
+                            <div className={`flex items-center gap-1.5 text-xs font-semibold ${getPlatformColor(ticket.platform)}`}>
+                                <Server size={14} className="text-current opacity-75" />
+                                <span>{ticket.platform}</span>
+                            </div>
+                            
+                            {/* Location */}
+                            {ticket.location && (
+                                <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                                    <MapPin size={14} className="text-slate-400" />
+                                    <span className="truncate max-w-[200px]">{ticket.location}</span>
                                 </div>
                             )}
                         </div>
 
-                        {/* Right Group: Status, Priority, Favorite */}
-                        <div className="flex items-center gap-2 shrink-0 ml-2">
+                        <div className="flex items-center gap-2 shrink-0">
                              <StatusBadge status={ticket.status} />
                              <PriorityBadge priority={ticket.priority} />
                              <button 
                                 onClick={(e) => onToggleFavorite(ticket.id, e)}
-                                className={`p-1 rounded-full transition-colors hover:bg-slate-100 ${ticket.isFavorite ? 'text-yellow-400' : 'text-slate-200 group-hover:text-slate-300'}`}
+                                className={`ml-1 p-1.5 rounded-full transition-colors hover:bg-slate-100 ${ticket.isFavorite ? 'text-yellow-400' : 'text-slate-200 group-hover:text-slate-300'}`}
                             >
-                                <Star size={16} fill={ticket.isFavorite ? "currentColor" : "none"} />
+                                <Star size={18} fill={ticket.isFavorite ? "currentColor" : "none"} />
                             </button>
                         </div>
                     </div>
 
-                    {/* Main Content Body */}
-                    <div className="pl-6 sm:pl-7"> 
-                        <h3 className="font-bold text-slate-800 text-base leading-snug truncate" title={ticket.title}>
+                    {/* Content Body */}
+                    <div className="mb-4 pl-7">
+                        <h3 className="text-lg font-bold text-slate-900 leading-tight mb-2" title={ticket.title}>
                             {ticket.title}
                         </h3>
                         
                         {/* Status Reason (Boxed matching Status Color) */}
                         {ticket.reason && (
-                            <div className="mt-1.5 mb-1">
-                                <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-medium border border-transparent ${getStatusColorClasses(ticket.status).bg} ${getStatusColorClasses(ticket.status).text}`}>
+                            <div className="mb-2">
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium border ${getStatusColorClasses(ticket.status).bg} ${getStatusColorClasses(ticket.status).text} ${getStatusColorClasses(ticket.status).border}`}>
                                     {ticket.reason}
                                 </span>
                             </div>
@@ -427,27 +453,19 @@ export default function TicketList({
 
                         {/* Summary Display */}
                         {ticket.summary && (
-                             <p className="text-xs text-slate-500 italic mt-1 line-clamp-2">{ticket.summary}</p>
+                             <p className="text-sm text-slate-500 italic line-clamp-2 border-l-2 border-slate-200 pl-3 py-0.5">
+                                {ticket.summary}
+                             </p>
                         )}
+                    </div>
 
-                        <div className="flex items-center gap-4 mt-2 text-xs text-slate-600">
-                            <div className={`flex items-center gap-1.5 font-medium ${getProductAreaColor(ticket.productArea)}`} title={`Area: ${ticket.productArea}`}>
-                                <LayoutGrid size={12} className="text-current" />
-                                <span>{ticket.productArea}</span>
-                            </div>
-                            <div className={`flex items-center gap-1.5 font-medium ${getPlatformColor(ticket.platform)}`} title={`Platform: ${ticket.platform}`}>
-                                <Server size={12} className="text-current" />
-                                <span>{ticket.platform}</span>
-                            </div>
+                    {/* Footer Separator */}
+                    <div className="h-px bg-slate-100 w-full mb-3"></div>
 
-                            <div className="flex items-center gap-1.5 text-slate-500" title={`Location: ${ticket.location}`}>
-                                <MapPin size={12} className="text-slate-400" />
-                                <span className="truncate max-w-[150px]">{ticket.location || 'N/A'}</span>
-                            </div>
-                        </div>
-
-                        {/* External Reference Tags */}
-                        <div className="flex flex-wrap gap-2 mt-2.5">
+                    {/* Footer Row: External Refs Left -- Dates Right */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pl-1">
+                        {/* External Reference Badges */}
+                        <div className="flex flex-wrap gap-2">
                             {ticket.fpTicketNumber && (
                                 <ReferenceBadge label="FP" value={ticket.fpTicketNumber.toString()} />
                             )}
@@ -462,6 +480,21 @@ export default function TicketList({
                             )}
                             {ticket.cpmNumber && (
                                 <ReferenceBadge label="CPM" value={ticket.cpmNumber.toString()} link={ticket.cpmLink} />
+                            )}
+                        </div>
+
+                        {/* Dates */}
+                        <div className="flex items-center gap-4 text-[10px] text-slate-400 font-medium">
+                            <div className="flex items-center gap-1">
+                                <Calendar size={12} className="text-slate-300" />
+                                <span>Updated {ticket.lastUpdatedDate}</span>
+                            </div>
+                            
+                            {getDaysActive(ticket.startDate) !== null && (
+                                <div className="flex items-center gap-1">
+                                    <Clock size={12} className="text-slate-300" />
+                                    <span>{getDaysActive(ticket.startDate)} Days Active</span>
+                                </div>
                             )}
                         </div>
                     </div>

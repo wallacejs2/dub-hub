@@ -85,13 +85,13 @@ export default function ResourceList({ resources, onOpenResource, onAddResource 
             {filteredResources.map(resource => (
                 <div 
                     key={resource.id}
-                    className="group relative bg-white rounded-lg border border-slate-200 p-3 shadow-sm transition-all hover:shadow-md hover:border-primary/50 cursor-pointer"
+                    className="group relative bg-white rounded-lg border border-slate-200 py-2 px-3 shadow-sm transition-all hover:shadow-md hover:border-primary/50 cursor-pointer"
                     onClick={() => onOpenResource(resource.id)}
                 >
                     <div className="flex justify-between items-start gap-4">
                         {/* Left Side: Content */}
                         <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 mb-1">
+                            <div className="flex items-center gap-3 mb-0.5">
                                 <h3 className="text-sm font-bold text-slate-800 truncate group-hover:text-primary transition-colors">
                                     {resource.title}
                                 </h3>
@@ -103,7 +103,7 @@ export default function ResourceList({ resources, onOpenResource, onAddResource 
                             </div>
 
                             {resource.description && (
-                                <p className="text-xs text-slate-500 line-clamp-1 mb-2">
+                                <p className="text-xs text-slate-500 line-clamp-1 mb-1">
                                     {resource.description}
                                 </p>
                             )}
@@ -124,13 +124,13 @@ export default function ResourceList({ resources, onOpenResource, onAddResource 
                         </div>
 
                         {/* Right Side: Meta Badges */}
-                        <div className="flex flex-col items-end gap-2 shrink-0">
+                        <div className="flex flex-col items-end gap-1 shrink-0">
                             <div className="flex gap-2">
                                 <CategoryBadge category={resource.category} />
                                 <ScopeBadge scope={resource.scope || ResourceScope.Internal} />
                             </div>
                             {resource.linkUrl && (
-                                <div className="text-[10px] text-slate-400 mt-1">
+                                <div className="text-[10px] text-slate-400 mt-0.5">
                                     <ExternalLink size={14} className="text-slate-300 group-hover:text-blue-500 transition-colors" />
                                 </div>
                             )}
