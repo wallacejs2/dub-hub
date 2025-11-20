@@ -453,7 +453,7 @@ export default function TicketList({
 
                         {/* Summary Display */}
                         {ticket.summary && (
-                             <p className="text-sm text-slate-500 italic line-clamp-2 border-l-2 border-slate-200 pl-3 py-0.5">
+                             <p className="text-[11px] text-slate-500 italic line-clamp-2 border-l-2 border-slate-200 pl-3 py-0.5">
                                 {ticket.summary}
                              </p>
                         )}
