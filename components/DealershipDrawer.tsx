@@ -1,9 +1,9 @@
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { Dealership, DealershipStatus, ReynoldsSolution, FullpathSolution, WebsiteLink, DMTOrderItem, CRMProvider } from '../types';
 import { DMT_PRODUCTS } from '../mockData';
 import { getTodayDateString, toInputDate, fromInputDate } from '../utils';
-import { X, Edit2, Save, Trash2, Plus, ExternalLink, CheckCircle, Circle, DollarSign } from 'lucide-react';
+import { X, Edit2, Save, Trash2, Plus, ExternalLink, CheckCircle2, Circle, DollarSign, Globe, CheckSquare, Square } from 'lucide-react';
 import { useToast } from './Toast';
 
 interface DealershipDrawerProps {
@@ -15,15 +15,16 @@ interface DealershipDrawerProps {
   isNew?: boolean;
 }
 
-// Reuse styled components from TicketDrawer contextually
+// --- Styled Components ---
+
 const SectionHeader = ({ children }: { children?: React.ReactNode }) => (
-  <h3 className="text-sm font-bold text-slate-800 mt-8 mb-4 pb-1 border-b border-slate-100">
+  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2 mt-8 first:mt-0">
     {children}
   </h3>
 );
 
 const FieldLabel = ({ children }: { children?: React.ReactNode }) => (
-  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
     {children}
   </label>
 );
@@ -34,7 +35,7 @@ const Input = ({ type = "text", value, onChange, placeholder, className = "" }: 
       value={value || ''} 
       onChange={onChange} 
       placeholder={placeholder}
-      className={`w-full px-3 py-1.5 bg-white border border-slate-300 rounded text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all ${className}`}
+      className={`w-full px-2 py-1.5 bg-white border border-slate-300 rounded text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all ${className}`}
   />
 );
 
@@ -43,7 +44,7 @@ const Select = ({ value, onChange, options }: any) => (
       <select 
           value={value} 
           onChange={onChange} 
-          className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none appearance-none"
+          className="w-full px-2 py-1.5 bg-white border border-slate-300 rounded text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none appearance-none"
       >
           {options.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
       </select>
@@ -58,7 +59,7 @@ const renderField = (label: string, content: React.ReactNode) => (
     <div className="mb-1">
         <FieldLabel>{label}</FieldLabel>
         <div className="min-h-[24px] flex items-center text-sm font-normal text-slate-800">
-          {content || <span className="text-slate-400 text-xs italic">Empty</span>}
+          {content || <span className="text-slate-400 text-xs italic">—</span>}
         </div>
     </div>
 );
@@ -67,23 +68,37 @@ const renderField = (label: string, content: React.ReactNode) => (
 
 const StatusBadge = ({ status }: { status: DealershipStatus }) => {
     const colors = {
-        [DealershipStatus.DMTPending]: 'bg-yellow-100 text-yellow-800',
-        [DealershipStatus.DMTApproved]: 'bg-blue-100 text-blue-800',
-        [DealershipStatus.Onboarding]: 'bg-purple-100 text-purple-800',
-        [DealershipStatus.Live]: 'bg-green-100 text-green-800',
-        [DealershipStatus.Cancelled]: 'bg-red-100 text-red-800',
+        [DealershipStatus.DMTPending]: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+        [DealershipStatus.DMTApproved]: 'bg-blue-100 text-blue-800 border-blue-200',
+        [DealershipStatus.Onboarding]: 'bg-purple-100 text-purple-800 border-purple-200',
+        [DealershipStatus.Live]: 'bg-green-100 text-green-800 border-green-200',
+        [DealershipStatus.Cancelled]: 'bg-red-100 text-red-800 border-red-200',
     };
-    return <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${colors[status]}`}>{status}</span>;
+    return <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${colors[status]}`}>{status}</span>;
 };
+
+const SolutionItem: React.FC<{ label: string, active: boolean, onClick?: () => void, isEditing: boolean }> = ({ label, active, onClick, isEditing }) => (
+    <div 
+        onClick={isEditing && onClick ? onClick : undefined}
+        className={`flex items-center gap-2 py-1 ${isEditing ? 'cursor-pointer hover:bg-slate-50 rounded px-1 -ml-1' : ''}`}
+    >
+        {active ? (
+            <CheckSquare size={16} className="text-blue-600" />
+        ) : (
+            <Square size={16} className="text-slate-300" />
+        )}
+        <span className={`text-sm ${active ? 'text-slate-900 font-medium' : 'text-slate-400'}`}>{label}</span>
+    </div>
+);
 
 export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate, onDelete, isNew = false }: DealershipDrawerProps) {
   const [formData, setFormData] = useState<Dealership | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const { addToast } = useToast();
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (dealership) {
-      // Ensure dmtOrders exists if loading older data
       const safeData = { 
           ...dealership, 
           dmtOrders: dealership.dmtOrders || [],
@@ -115,7 +130,6 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
       if(isNew) {
           onClose();
       } else {
-          // Revert to original
           if(dealership) setFormData({ 
               ...dealership, 
               dmtOrders: dealership.dmtOrders || [],
@@ -130,7 +144,6 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
       if (formData) onDelete(formData.id);
   }
 
-  // --- Format Phone ---
   const formatPhoneNumber = (value: string) => {
     const numbers = value.replace(/\D/g, '');
     const char = { 0: '(', 3: ') ', 6: '-' };
@@ -141,7 +154,6 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
     return str.substring(0, 14);
   };
 
-  // --- Dynamic Links Logic ---
   const handleLinkChange = (id: string, field: 'url' | 'clientId', value: string) => {
       if (!formData) return;
       const updatedLinks = formData.websiteLinks.map(link => 
@@ -161,7 +173,6 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
       handleChange('websiteLinks', formData.websiteLinks.filter(l => l.id !== id));
   };
 
-  // --- DMT Order Logic ---
   const addDmtOrder = () => {
       if (!formData) return;
       const newOrder: DMTOrderItem = {
@@ -186,7 +197,6 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
       let updatedOrders = formData.dmtOrders.map(order => {
           if (order.id === id) {
               const updated = { ...order, [field]: value };
-              // If product changes, auto-update price
               if (field === 'productId') {
                   const product = DMT_PRODUCTS.find(p => p.id === value);
                   if (product) {
@@ -207,7 +217,6 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
         .reduce((sum, o) => sum + (Number(o.price) || 0), 0);
   }, [formData]);
 
-  // --- Multi Select Logic ---
   const toggleSolution = (arrayName: 'reynoldsSolutions' | 'fullpathSolutions', value: string) => {
       if (!formData) return;
       const currentArray = formData[arrayName] as string[];
@@ -220,287 +229,275 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
 
   return (
     <>
-      {/* Backdrop */}
       <div 
         className={`fixed inset-0 bg-slate-900/30 backdrop-blur-[2px] z-40 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
         onClick={onClose}
       />
 
-      {/* Drawer */}
       <div className={`fixed top-0 right-0 bottom-0 w-full max-w-4xl bg-white shadow-2xl z-50 flex flex-col transform transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         
         {formData ? (
             <>
-                {/* Header Section */}
-                <div className="px-8 py-6 border-b border-slate-200 bg-white flex flex-col gap-4">
-                    {/* Row 1: Buttons Row */}
-                    <div className="flex items-center justify-end gap-2">
-                        {isEditing ? (
-                            <>
-                                <button onClick={handleCancel} className="text-xs text-slate-500 hover:underline px-3">Cancel</button>
-                                <button 
-                                    onClick={handleSave}
-                                    className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded shadow-sm transition-colors"
-                                >
-                                    <Save size={14} /> Save Changes
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <button 
-                                    onClick={() => setIsEditing(true)}
-                                    className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded shadow-sm transition-colors"
-                                >
-                                    <Edit2 size={14} /> Edit
-                                </button>
-                                <button 
-                                    onClick={handleDelete}
-                                    className="flex items-center gap-2 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded shadow-sm transition-colors"
-                                >
-                                    <Trash2 size={14} /> Delete
-                                </button>
-                            </>
-                        )}
+                {/* 1. Sticky Header */}
+                <div className="flex-none bg-white px-6 py-4 z-10">
+                    <div className="flex flex-col gap-4">
+                        {/* Action Buttons */}
+                        <div className="flex items-center justify-end gap-2">
+                            {isEditing ? (
+                                <>
+                                    <button onClick={handleCancel} className="text-xs text-slate-500 hover:underline px-3">Cancel</button>
+                                    <button 
+                                        onClick={handleSave}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded shadow-sm transition-colors"
+                                    >
+                                        <Save size={12} /> Save
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button 
+                                        onClick={() => setIsEditing(true)}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium rounded shadow-sm transition-colors"
+                                    >
+                                        <Edit2 size={12} /> Edit
+                                    </button>
+                                    <button 
+                                        onClick={handleDelete}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-red-50 hover:border-red-200 hover:text-red-600 text-slate-700 text-xs font-medium rounded shadow-sm transition-colors"
+                                    >
+                                        <Trash2 size={12} /> Delete
+                                    </button>
+                                </>
+                            )}
 
-                        <button onClick={onClose} className="ml-2 p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600">
-                            <X size={20} />
-                        </button>
-                    </div>
+                            <div className="w-px h-6 bg-slate-200 mx-1"></div>
 
-                    {/* Row 2: Title / Header */}
-                    <div>
-                         <div className="flex items-center gap-2 text-sm text-slate-500 font-mono mb-1">
-                            CIF: {isEditing ? (
-                                <input 
-                                    type="number" 
-                                    className="bg-slate-100 border border-slate-300 rounded px-1 w-24 focus:outline-none focus:border-primary"
-                                    value={formData.accountNumber || ''}
-                                    onChange={(e) => handleChange('accountNumber', parseInt(e.target.value) || 0)}
-                                />
-                            ) : formData.accountNumber}
-                         </div>
-                        {!isEditing ? (
-                            <h2 className="text-2xl font-bold text-slate-900">{formData.accountName || "New Dealership"}</h2>
-                        ) : (
-                            <div>
-                                <FieldLabel>Account Name</FieldLabel>
-                                <Input value={formData.accountName} onChange={(e: any) => handleChange('accountName', e.target.value)} className="text-lg font-bold" placeholder="Dealership Name" />
-                            </div>
-                        )}
+                            <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-md text-slate-400 hover:text-slate-600 transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Title Section */}
+                        <div className="border-b border-slate-100 pb-4">
+                            {isEditing ? (
+                                <div className="space-y-3">
+                                    <div><FieldLabel>CIF</FieldLabel><Input type="number" value={formData.accountNumber} onChange={(e: any) => handleChange('accountNumber', parseInt(e.target.value) || 0)} className="w-32" /></div>
+                                    <div><FieldLabel>Dealership Name</FieldLabel><Input value={formData.accountName} onChange={(e: any) => handleChange('accountName', e.target.value)} className="text-xl font-bold" /></div>
+                                </div>
+                            ) : (
+                                <div>
+                                    <h2 className="text-2xl font-bold text-slate-900 leading-tight">{formData.accountName}</h2>
+                                    <span className="text-sm text-slate-400 font-mono mt-1 block">CIF: {formData.accountNumber}</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-slate-50/50">
-
-                    {/* 1. Core Status */}
-                    <SectionHeader>Core Status</SectionHeader>
-                    <div className="grid grid-cols-3 gap-x-8 gap-y-6">
-                        {isEditing ? (
-                            <>
-                                <div><FieldLabel>Status</FieldLabel><Select value={formData.status} options={Object.values(DealershipStatus)} onChange={(e: any) => handleChange('status', e.target.value)} /></div>
-                                <div><FieldLabel>Go-Live Date</FieldLabel><Input type="date" value={toInputDate(formData.goLiveDate)} onChange={(e: any) => handleChange('goLiveDate', fromInputDate(e.target.value))} /></div>
-                                <div><FieldLabel>Term Date</FieldLabel><Input type="date" value={toInputDate(formData.termDate)} onChange={(e: any) => handleChange('termDate', fromInputDate(e.target.value))} /></div>
-                            </>
-                        ) : (
-                            <>
-                                {renderField('Status', <StatusBadge status={formData.status} />)}
-                                {renderField('Go-Live Date', formData.goLiveDate)}
-                                {renderField('Term Date', formData.termDate)}
-                            </>
-                        )}
+                {/* Content Area */}
+                <div className="flex-1 overflow-y-auto bg-white custom-scrollbar px-6 pb-10" ref={scrollRef}>
+                    
+                    {/* 2. Core Status */}
+                    <div className="bg-slate-50 border-y border-slate-100 px-4 py-3 -mx-6 mb-6">
+                        <div className="flex items-center gap-8">
+                             {isEditing ? (
+                                <>
+                                    <div className="flex-1"><FieldLabel>Status</FieldLabel><Select value={formData.status} options={Object.values(DealershipStatus)} onChange={(e: any) => handleChange('status', e.target.value)} /></div>
+                                    <div className="flex-1"><FieldLabel>Go-Live Date</FieldLabel><Input type="date" value={toInputDate(formData.goLiveDate)} onChange={(e: any) => handleChange('goLiveDate', fromInputDate(e.target.value))} /></div>
+                                    <div className="flex-1"><FieldLabel>Term Date</FieldLabel><Input type="date" value={toInputDate(formData.termDate)} onChange={(e: any) => handleChange('termDate', fromInputDate(e.target.value))} /></div>
+                                </>
+                             ) : (
+                                <>
+                                    {renderField('Status', <StatusBadge status={formData.status} />)}
+                                    {renderField('Go-Live Date', formData.goLiveDate)}
+                                    {renderField('Term Date', formData.termDate)}
+                                </>
+                             )}
+                        </div>
                     </div>
 
-                    {/* 2. Account Details */}
+                    {/* 3. Account Details (2-Column Grid) */}
                     <SectionHeader>Account Details</SectionHeader>
-                    <div className="grid grid-cols-3 gap-x-8 gap-y-6">
-                        {isEditing ? (
-                            <>
-                                <div><FieldLabel>Enterprise (Group)</FieldLabel><Input value={formData.enterpriseGroup} onChange={(e: any) => handleChange('enterpriseGroup', e.target.value)} /></div>
-                                <div><FieldLabel>Store Number</FieldLabel><Input value={formData.storeNumber} onChange={(e: any) => handleChange('storeNumber', e.target.value)} /></div>
-                                <div><FieldLabel>Branch Number</FieldLabel><Input value={formData.branchNumber} onChange={(e: any) => handleChange('branchNumber', e.target.value)} /></div>
-                                
-                                <div><FieldLabel>ERA System ID</FieldLabel><Input type="number" value={formData.eraSystemId} onChange={(e: any) => handleChange('eraSystemId', parseInt(e.target.value) || undefined)} /></div>
-                                <div><FieldLabel>PPSysID</FieldLabel><Input type="number" value={formData.ppSysId} onChange={(e: any) => handleChange('ppSysId', parseInt(e.target.value) || undefined)} /></div>
-                                <div><FieldLabel>BU-ID</FieldLabel><Input type="number" value={formData.buId} onChange={(e: any) => handleChange('buId', parseInt(e.target.value) || undefined)} /></div>
-                                
-                                <div>
-                                    <FieldLabel>CRM Provider</FieldLabel>
-                                    <Select 
-                                        value={formData.crmProvider} 
-                                        options={Object.values(CRMProvider)} 
-                                        onChange={(e: any) => handleChange('crmProvider', e.target.value)} 
-                                    />
-                                </div>
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-x-12 gap-y-4">
+                            {/* Column 1 */}
+                            <div className="space-y-4">
+                                {isEditing ? (
+                                    <>
+                                        <div><FieldLabel>Enterprise Group</FieldLabel><Input value={formData.enterpriseGroup} onChange={(e: any) => handleChange('enterpriseGroup', e.target.value)} /></div>
+                                        <div><FieldLabel>ERA System ID</FieldLabel><Input type="number" value={formData.eraSystemId} onChange={(e: any) => handleChange('eraSystemId', parseInt(e.target.value) || undefined)} /></div>
+                                        <div><FieldLabel>BU-ID</FieldLabel><Input type="number" value={formData.buId} onChange={(e: any) => handleChange('buId', parseInt(e.target.value) || undefined)} /></div>
+                                        <div><FieldLabel>CRM Provider</FieldLabel><Select value={formData.crmProvider} options={Object.values(CRMProvider)} onChange={(e: any) => handleChange('crmProvider', e.target.value)} /></div>
+                                    </>
+                                ) : (
+                                    <>
+                                        {renderField('Enterprise Group', formData.enterpriseGroup)}
+                                        {renderField('ERA System ID', formData.eraSystemId)}
+                                        {renderField('BU-ID', formData.buId)}
+                                        {renderField('CRM Provider', formData.crmProvider)}
+                                    </>
+                                )}
+                            </div>
 
-                                <div className="col-span-3"><FieldLabel>Address</FieldLabel><Input value={formData.address} onChange={(e: any) => handleChange('address', e.target.value)} /></div>
-                            </>
-                        ) : (
-                            <>
-                                {renderField('Enterprise (Group)', formData.enterpriseGroup)}
-                                {renderField('Store / Branch', `${formData.storeNumber || '-'} / ${formData.branchNumber || '-'}`)}
-                                <div></div> {/* Spacer to align grid */}
-                                {renderField('ERA System ID', formData.eraSystemId)}
-                                {renderField('PPSysID', formData.ppSysId)}
-                                {renderField('BU-ID', formData.buId)}
-                                {renderField('CRM Provider', formData.crmProvider)}
-                                <div className="col-span-3">{renderField('Address', formData.address)}</div>
-                            </>
-                        )}
+                            {/* Column 2 */}
+                            <div className="space-y-4">
+                                {isEditing ? (
+                                    <>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div><FieldLabel>Store #</FieldLabel><Input value={formData.storeNumber} onChange={(e: any) => handleChange('storeNumber', e.target.value)} /></div>
+                                            <div><FieldLabel>Branch #</FieldLabel><Input value={formData.branchNumber} onChange={(e: any) => handleChange('branchNumber', e.target.value)} /></div>
+                                        </div>
+                                        <div><FieldLabel>PPSysID</FieldLabel><Input type="number" value={formData.ppSysId} onChange={(e: any) => handleChange('ppSysId', parseInt(e.target.value) || undefined)} /></div>
+                                    </>
+                                ) : (
+                                    <>
+                                        {renderField('Store / Branch', `${formData.storeNumber || ''} / ${formData.branchNumber || ''}`)}
+                                        {renderField('PPSysID', formData.ppSysId)}
+                                    </>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Full Width Address */}
+                        <div>
+                             {isEditing ? (
+                                <div><FieldLabel>Address</FieldLabel><Input value={formData.address} onChange={(e: any) => handleChange('address', e.target.value)} /></div>
+                             ) : renderField('Address', formData.address)}
+                        </div>
                     </div>
 
-                    {/* 3. Website Links */}
+                    {/* 4. Website Links */}
                     <SectionHeader>Website Links</SectionHeader>
-                    <div className="space-y-3">
-                        {formData.websiteLinks.map((link) => (
-                            <div key={link.id} className="flex items-end gap-4">
-                                <div className="flex-1">
-                                    <FieldLabel>URL</FieldLabel>
+                    <div>
+                        <div className="grid grid-cols-2 gap-x-12 gap-y-2 mb-2">
+                            <FieldLabel>Primary URL</FieldLabel>
+                            <FieldLabel>Client ID</FieldLabel>
+                        </div>
+                        <div className="space-y-2">
+                            {formData.websiteLinks.map((link) => (
+                                <div key={link.id} className="grid grid-cols-2 gap-x-12 gap-y-2 items-center">
                                     {isEditing ? (
                                         <Input value={link.url} onChange={(e: any) => handleLinkChange(link.id, 'url', e.target.value)} placeholder="https://..." />
                                     ) : (
-                                        <div className="min-h-[24px] flex items-center text-sm font-normal">
+                                        <div className="text-sm font-normal truncate">
                                             {link.url ? (
                                                 <a href={link.url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline flex items-center gap-1">
-                                                    {link.url} <ExternalLink size={12}/>
+                                                    {link.url} <ExternalLink size={10}/>
                                                 </a>
-                                            ) : <span className="text-slate-400 text-xs italic">Empty</span>}
+                                            ) : <span className="text-slate-400 italic">—</span>}
                                         </div>
                                     )}
-                                </div>
-                                <div className="w-1/3">
-                                    <FieldLabel>Client ID</FieldLabel>
-                                    {isEditing ? (
-                                        <Input value={link.clientId} onChange={(e: any) => handleLinkChange(link.id, 'clientId', e.target.value)} placeholder="ID" />
-                                    ) : (
-                                        <div className="min-h-[24px] flex items-center text-sm font-normal text-slate-800 bg-slate-100 px-2 rounded w-fit">
-                                            {link.clientId}
-                                        </div>
-                                    )}
-                                </div>
-                                {isEditing && (
-                                    <button onClick={() => removeLink(link.id)} className="mb-1.5 p-2 text-slate-400 hover:text-red-500 rounded hover:bg-red-50">
-                                        <Trash2 size={16} />
-                                    </button>
-                                )}
-                            </div>
-                        ))}
 
+                                    <div className="flex items-center gap-2">
+                                        {isEditing ? (
+                                            <Input value={link.clientId} onChange={(e: any) => handleLinkChange(link.id, 'clientId', e.target.value)} placeholder="ID" />
+                                        ) : (
+                                            <span className="text-sm font-normal text-slate-800">{link.clientId || <span className="text-slate-400 italic">—</span>}</span>
+                                        )}
+                                        {isEditing && (
+                                            <button onClick={() => removeLink(link.id)} className="text-slate-400 hover:text-red-500 p-1">
+                                                <Trash2 size={14} />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                         {isEditing && (
-                            <button onClick={addLink} className="flex items-center gap-1 text-xs text-primary hover:underline mt-2">
+                            <button onClick={addLink} className="flex items-center gap-1 text-xs text-primary hover:underline mt-3">
                                 <Plus size={14} /> Add Link
                             </button>
                         )}
                     </div>
 
-                    {/* 4. Equity Provider */}
+                    {/* 5. Equity Provider */}
                     <SectionHeader>Equity Provider</SectionHeader>
                     <div>
-                        {isEditing ? (
+                         {isEditing ? (
                             <Input value={formData.equityProvider} onChange={(e: any) => handleChange('equityProvider', e.target.value)} />
-                        ) : (
-                             renderField('Provider', formData.equityProvider)
-                        )}
+                        ) : renderField('Provider Name', formData.equityProvider)}
                     </div>
 
-                    {/* 5. Solution Details */}
+                    {/* 6. Solution Details */}
                     <SectionHeader>Solution Details</SectionHeader>
-                    
-                    <div className="space-y-6">
-                         {/* Reynolds Solutions */}
+                    <div className="grid grid-cols-2 gap-x-12">
                          <div>
-                            <FieldLabel>Reynolds Solutions</FieldLabel>
-                            <div className="flex flex-wrap gap-2 mt-1">
-                                {Object.values(ReynoldsSolution).map(sol => {
-                                    const isSelected = formData.reynoldsSolutions.includes(sol);
-                                    if (!isEditing && !isSelected) return null;
-
-                                    return (
-                                        <button
-                                            key={sol}
-                                            onClick={() => isEditing && toggleSolution('reynoldsSolutions', sol)}
-                                            className={`
-                                                px-3 py-1 rounded-full text-xs font-bold border transition-all
-                                                ${isSelected 
-                                                    ? 'bg-blue-600 text-white border-blue-600' 
-                                                    : 'bg-white text-slate-500 border-slate-200 hover:border-blue-300'
-                                                }
-                                                ${!isEditing ? 'cursor-default' : 'cursor-pointer'}
-                                            `}
-                                        >
-                                            {sol}
-                                        </button>
-                                    )
-                                })}
-                                {!isEditing && formData.reynoldsSolutions.length === 0 && <span className="text-sm text-slate-400 italic">None</span>}
-                            </div>
+                             <FieldLabel>Reynolds Solutions</FieldLabel>
+                             <div className="mt-2 space-y-1">
+                                 {Object.values(ReynoldsSolution).map(sol => (
+                                     <SolutionItem 
+                                        key={sol} 
+                                        label={sol} 
+                                        active={formData.reynoldsSolutions.includes(sol)} 
+                                        isEditing={isEditing}
+                                        onClick={() => toggleSolution('reynoldsSolutions', sol)}
+                                     />
+                                 ))}
+                             </div>
                          </div>
-
-                         {/* Fullpath Solutions */}
                          <div>
-                            <FieldLabel>Fullpath Solutions</FieldLabel>
-                            <div className="flex flex-wrap gap-2 mt-1">
-                                {Object.values(FullpathSolution).map(sol => {
-                                    const isSelected = formData.fullpathSolutions.includes(sol);
-                                    if (!isEditing && !isSelected) return null;
-
-                                    return (
-                                        <button
-                                            key={sol}
-                                            onClick={() => isEditing && toggleSolution('fullpathSolutions', sol)}
-                                            className={`
-                                                px-3 py-1 rounded-full text-xs font-bold border transition-all
-                                                ${isSelected 
-                                                    ? 'bg-orange-500 text-white border-orange-500' 
-                                                    : 'bg-white text-slate-500 border-slate-200 hover:border-orange-300'
-                                                }
-                                                ${!isEditing ? 'cursor-default' : 'cursor-pointer'}
-                                            `}
-                                        >
-                                            {sol}
-                                        </button>
-                                    )
-                                })}
-                                {!isEditing && formData.fullpathSolutions.length === 0 && <span className="text-sm text-slate-400 italic">None</span>}
-                            </div>
+                             <FieldLabel>Fullpath Solutions</FieldLabel>
+                             <div className="mt-2 space-y-1">
+                                 {Object.values(FullpathSolution).map(sol => (
+                                     <SolutionItem 
+                                        key={sol} 
+                                        label={sol} 
+                                        active={formData.fullpathSolutions.includes(sol)} 
+                                        isEditing={isEditing}
+                                        onClick={() => toggleSolution('fullpathSolutions', sol)}
+                                     />
+                                 ))}
+                             </div>
                          </div>
                     </div>
 
-                    {/* 6. Contacts */}
+                    {/* 7. Contacts & Sales */}
                     <SectionHeader>Contacts & Sales</SectionHeader>
-                    <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-                        {isEditing ? (
-                            <>
-                                <div><FieldLabel>Assigned Specialist</FieldLabel><Input value={formData.assignedSpecialist} onChange={(e: any) => handleChange('assignedSpecialist', e.target.value)} /></div>
-                                <div><FieldLabel>Sales</FieldLabel><Input value={formData.salesPerson} onChange={(e: any) => handleChange('salesPerson', e.target.value)} /></div>
-                                
-                                <div><FieldLabel>Point of Contact Name</FieldLabel><Input value={formData.pocName} onChange={(e: any) => handleChange('pocName', e.target.value)} /></div>
-                                <div><FieldLabel>Point of Contact Email</FieldLabel><Input value={formData.pocEmail} onChange={(e: any) => handleChange('pocEmail', e.target.value)} /></div>
-                                <div>
-                                    <FieldLabel>Point of Contact Phone</FieldLabel>
-                                    <Input value={formData.pocPhone} onChange={(e: any) => handleChange('pocPhone', formatPhoneNumber(e.target.value))} placeholder="(555) 555-5555" />
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                {renderField('Assigned Specialist', formData.assignedSpecialist)}
-                                {renderField('Sales', formData.salesPerson)}
-                                {renderField('POC Name', formData.pocName)}
-                                {renderField('POC Email', formData.pocEmail)}
-                                {renderField('POC Phone', formData.pocPhone)}
-                            </>
-                        )}
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-x-12 gap-y-4">
+                             <div className="space-y-4">
+                                {isEditing ? (
+                                    <>
+                                        <div><FieldLabel>Assigned Specialist</FieldLabel><Input value={formData.assignedSpecialist} onChange={(e: any) => handleChange('assignedSpecialist', e.target.value)} /></div>
+                                        <div><FieldLabel>POC Name</FieldLabel><Input value={formData.pocName} onChange={(e: any) => handleChange('pocName', e.target.value)} /></div>
+                                    </>
+                                ) : (
+                                    <>
+                                        {renderField('Assigned Specialist', formData.assignedSpecialist)}
+                                        {renderField('POC Name', formData.pocName)}
+                                    </>
+                                )}
+                             </div>
+                             <div className="space-y-4">
+                                {isEditing ? (
+                                    <>
+                                        <div><FieldLabel>Sales Contact</FieldLabel><Input value={formData.salesPerson} onChange={(e: any) => handleChange('salesPerson', e.target.value)} /></div>
+                                        <div><FieldLabel>POC Email</FieldLabel><Input value={formData.pocEmail} onChange={(e: any) => handleChange('pocEmail', e.target.value)} /></div>
+                                    </>
+                                ) : (
+                                    <>
+                                        {renderField('Sales Contact', formData.salesPerson)}
+                                        {renderField('POC Email', formData.pocEmail)}
+                                    </>
+                                )}
+                             </div>
+                        </div>
+                        <div>
+                             {isEditing ? (
+                                <div><FieldLabel>POC Phone</FieldLabel><Input value={formData.pocPhone} onChange={(e: any) => handleChange('pocPhone', formatPhoneNumber(e.target.value))} placeholder="(555) 555-5555" /></div>
+                             ) : renderField('POC Phone', formData.pocPhone)}
+                        </div>
                     </div>
 
-                    {/* 7. DMT Orders */}
+                    {/* 8. DMT Orders */}
                     <SectionHeader>DMT Orders</SectionHeader>
                     <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
                         {/* Table Header */}
-                        <div className="grid grid-cols-[100px_100px_1fr_100px_60px_40px] gap-4 px-4 py-2 bg-slate-50 border-b border-slate-200 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        <div className="grid grid-cols-[80px_120px_1fr_80px_40px_30px] gap-2 px-4 py-2 bg-slate-50 border-b border-slate-200 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                             <div>Received</div>
                             <div>Order #</div>
                             <div>Product</div>
-                            <div>Price</div>
+                            <div className="text-right">Price</div>
                             <div className="text-center">Active</div>
                             <div></div>
                         </div>
@@ -512,104 +509,50 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
                                     const selectedProduct = DMT_PRODUCTS.find(p => p.id === order.productId);
                                     
                                     return (
-                                        <div key={order.id} className="grid grid-cols-[100px_100px_1fr_100px_60px_40px] gap-4 px-4 py-3 items-center text-sm">
-                                            {/* Received Date */}
+                                        <div key={order.id} className="grid grid-cols-[80px_120px_1fr_80px_40px_30px] gap-2 px-4 py-3 items-center text-sm">
+                                            {/* Received */}
                                             {isEditing ? (
-                                                <input 
-                                                    type="date" 
-                                                    className="w-full bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-sm focus:outline-none focus:border-primary"
-                                                    value={toInputDate(order.receivedDate)}
-                                                    onChange={(e) => handleOrderChange(order.id, 'receivedDate', fromInputDate(e.target.value))}
-                                                />
-                                            ) : (
-                                                <span className="text-slate-600 font-normal">{order.receivedDate}</span>
-                                            )}
+                                                <input type="date" className="w-full text-xs bg-slate-50 border border-slate-200 rounded px-1 py-0.5" value={toInputDate(order.receivedDate)} onChange={(e) => handleOrderChange(order.id, 'receivedDate', fromInputDate(e.target.value))} />
+                                            ) : <span className="text-slate-600 text-xs">{order.receivedDate}</span>}
 
-                                            {/* Order Number */}
+                                            {/* Order # */}
                                             {isEditing ? (
-                                                <input 
-                                                    type="number" 
-                                                    className="w-full bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-sm focus:outline-none focus:border-primary"
-                                                    value={order.orderNumber || ''}
-                                                    onChange={(e) => handleOrderChange(order.id, 'orderNumber', parseInt(e.target.value) || 0)}
-                                                    placeholder="#"
-                                                />
-                                            ) : (
-                                                <span className="text-slate-800 font-mono font-normal">{order.orderNumber}</span>
-                                            )}
+                                                <input type="number" className="w-full text-xs bg-slate-50 border border-slate-200 rounded px-1 py-0.5" value={order.orderNumber} onChange={(e) => handleOrderChange(order.id, 'orderNumber', parseInt(e.target.value))} />
+                                            ) : <span className="text-slate-800 font-mono text-xs">{order.orderNumber}</span>}
 
                                             {/* Product */}
                                             {isEditing ? (
-                                                <select 
-                                                    className="w-full bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-sm focus:outline-none focus:border-primary"
-                                                    value={order.productId}
-                                                    onChange={(e) => handleOrderChange(order.id, 'productId', e.target.value)}
-                                                >
-                                                    <option value="">Select Product...</option>
-                                                    <optgroup label="New">
-                                                        {DMT_PRODUCTS.filter(p => p.category === 'New').map(p => (
-                                                            <option key={p.id} value={p.id}>{p.code} | {p.name}</option>
-                                                        ))}
-                                                    </optgroup>
-                                                    <optgroup label="Old">
-                                                        {DMT_PRODUCTS.filter(p => p.category === 'Old').map(p => (
-                                                            <option key={p.id} value={p.id}>{p.code} | {p.name}</option>
-                                                        ))}
-                                                    </optgroup>
+                                                <select className="w-full text-xs bg-slate-50 border border-slate-200 rounded px-1 py-0.5" value={order.productId} onChange={(e) => handleOrderChange(order.id, 'productId', e.target.value)}>
+                                                    <option value="">Select...</option>
+                                                    {DMT_PRODUCTS.map(p => <option key={p.id} value={p.id}>{p.code} | {p.name}</option>)}
                                                 </select>
-                                            ) : (
-                                                <span className="text-slate-800 font-normal">
-                                                    {selectedProduct ? `${selectedProduct.code} | ${selectedProduct.name}` : 'Unknown Product'}
-                                                </span>
-                                            )}
+                                            ) : <span className="text-slate-800 text-xs">{selectedProduct ? selectedProduct.name : 'Unknown'}</span>}
 
                                             {/* Price */}
                                             {isEditing ? (
-                                                <div className="relative">
-                                                    <span className="absolute left-1 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
-                                                    <input 
-                                                        type="number"
-                                                        className="w-full pl-3 pr-1 py-0.5 bg-slate-50 border border-slate-200 rounded text-sm focus:outline-none focus:border-primary text-right"
-                                                        value={order.price}
-                                                        onChange={(e) => handleOrderChange(order.id, 'price', parseFloat(e.target.value) || 0)}
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <span className="text-slate-600 font-mono font-normal">${order.price.toLocaleString()}</span>
-                                            )}
+                                                <input type="number" className="w-full text-xs text-right bg-slate-50 border border-slate-200 rounded px-1 py-0.5" value={order.price} onChange={(e) => handleOrderChange(order.id, 'price', parseFloat(e.target.value))} />
+                                            ) : <span className="text-slate-600 font-mono text-xs text-right block">${order.price.toLocaleString()}</span>}
 
-                                            {/* Active Toggle */}
+                                            {/* Active */}
                                             <div className="flex justify-center">
-                                                <button 
-                                                    onClick={() => isEditing && handleOrderChange(order.id, 'isActive', !order.isActive)}
-                                                    className={`${isEditing ? 'cursor-pointer hover:opacity-80' : 'cursor-default'} transition-colors`}
-                                                    disabled={!isEditing}
-                                                >
-                                                    {order.isActive ? (
-                                                        <CheckCircle size={18} className="text-green-500 fill-green-50" />
-                                                    ) : (
-                                                        <Circle size={18} className="text-slate-300" />
-                                                    )}
+                                                <button onClick={() => isEditing && handleOrderChange(order.id, 'isActive', !order.isActive)} disabled={!isEditing}>
+                                                    {order.isActive ? <CheckCircle2 size={14} className="text-green-500" /> : <Circle size={14} className="text-slate-300" />}
                                                 </button>
                                             </div>
 
                                             {/* Actions */}
                                             <div className="flex justify-end">
-                                                {isEditing && (
-                                                    <button onClick={() => removeDmtOrder(order.id)} className="text-slate-400 hover:text-red-500">
-                                                        <Trash2 size={14} />
-                                                    </button>
-                                                )}
+                                                {isEditing && <button onClick={() => removeDmtOrder(order.id)} className="text-slate-400 hover:text-red-500"><Trash2 size={12} /></button>}
                                             </div>
                                         </div>
                                     )
                                 })
                             ) : (
-                                <div className="p-4 text-center text-slate-400 text-xs italic">No orders added.</div>
+                                <div className="p-4 text-center text-slate-400 text-xs italic">No orders recorded.</div>
                             )}
                         </div>
 
-                        {/* Footer: Total & Add Button */}
+                        {/* Footer */}
                         <div className="bg-slate-50 px-4 py-3 border-t border-slate-200 flex justify-between items-center">
                             <div>
                                 {isEditing && (
@@ -618,11 +561,10 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
                                     </button>
                                 )}
                             </div>
-                            <div className="flex items-center gap-4">
-                                <span className="text-xs font-bold text-slate-500 uppercase">Total Selling Price</span>
-                                <div className="text-lg font-bold text-green-600 font-mono flex items-center">
-                                    <DollarSign size={16} strokeWidth={3} />
-                                    {totalSellingPrice.toLocaleString()}
+                            <div className="flex items-center gap-3">
+                                <span className="text-[10px] font-bold text-slate-500 uppercase">Total Selling Price</span>
+                                <div className="text-sm font-bold text-green-700 font-mono">
+                                    ${totalSellingPrice.toLocaleString()}
                                 </div>
                             </div>
                         </div>
@@ -638,8 +580,6 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
                             </button>
                         </div>
                     )}
-
-                    <div className="h-20"></div>
                 </div>
             </>
         ) : (
