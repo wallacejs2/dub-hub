@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Resource, ResourceCategory, ResourceScope } from '../types';
-import { Filter, Plus, ExternalLink, Tag, Globe, Lock } from 'lucide-react';
+import { Filter, Plus, ExternalLink, Tag, Globe, Lock, Clock } from 'lucide-react';
 
 interface ResourceListProps {
   resources: Resource[];
@@ -17,7 +17,7 @@ const CategoryBadge = ({ category }: { category: ResourceCategory }) => {
         [ResourceCategory.XML]: 'bg-green-50 text-green-700 border-green-200',
     };
     return (
-        <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${colors[category]}`}>
+        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${colors[category]}`}>
             {category}
         </span>
     );
@@ -26,13 +26,13 @@ const CategoryBadge = ({ category }: { category: ResourceCategory }) => {
 const ScopeBadge = ({ scope }: { scope: ResourceScope }) => {
     if (scope === ResourceScope.External) {
         return (
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-600 border border-emerald-100">
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                 <Globe size={10} /> External
             </div>
         );
     }
     return (
-        <div className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-500 border border-slate-200">
+        <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
             <Lock size={10} /> Internal
         </div>
     );
@@ -80,61 +80,54 @@ export default function ResourceList({ resources, onOpenResource, onAddResource 
             </button>
         </div>
 
-        {/* Stacked List */}
-        <div className="flex flex-col space-y-2">
+        {/* List */}
+        <div className="flex flex-col space-y-3">
             {filteredResources.map(resource => (
                 <div 
                     key={resource.id}
-                    className="group relative bg-white rounded-lg border border-slate-200 py-2 px-3 shadow-sm transition-all hover:shadow-md hover:border-primary/50 cursor-pointer"
+                    className="group relative bg-white rounded-xl border border-slate-200 p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:border-blue-300 cursor-pointer flex flex-col"
                     onClick={() => onOpenResource(resource.id)}
                 >
+                    {/* 1. Header: Title & Version */}
                     <div className="flex justify-between items-start gap-4">
-                        {/* Left Side: Content */}
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 mb-0.5">
-                                <h3 className="text-sm font-bold text-slate-800 truncate group-hover:text-primary transition-colors">
+                        <div className="flex-1">
+                            <div className="flex items-baseline gap-2 mb-1">
+                                <h3 className="text-base font-bold text-slate-900 leading-tight">
                                     {resource.title}
                                 </h3>
-                                <div className="flex items-center gap-2 text-[10px] text-slate-400 shrink-0">
-                                    <span>v{resource.version}</span>
-                                    <span className="w-0.5 h-0.5 rounded-full bg-slate-300"></span>
-                                    <span>{resource.date}</span>
-                                </div>
+                                <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 text-[10px] font-mono font-medium border border-slate-200">
+                                    v{resource.version}
+                                </span>
                             </div>
-
-                            {resource.description && (
-                                <p className="text-xs text-slate-500 line-clamp-1 mb-1">
-                                    {resource.description}
-                                </p>
-                            )}
-
-                             {/* Topics Inline */}
-                             {resource.topics && (
-                                <div className="flex items-center gap-2 overflow-hidden">
-                                    <Tag size={10} className="text-slate-400 shrink-0" />
-                                    <div className="flex gap-1 overflow-hidden flex-wrap h-5">
-                                        {resource.topics.split(',').slice(0, 4).map((topic, i) => (
-                                            <span key={i} className="bg-slate-50 px-1.5 py-0.5 rounded text-[10px] text-slate-500 border border-slate-100 whitespace-nowrap">
-                                                {topic.trim()}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
                         </div>
+                    </div>
 
-                        {/* Right Side: Meta Badges */}
-                        <div className="flex flex-col items-end gap-1 shrink-0">
-                            <div className="flex gap-2">
-                                <CategoryBadge category={resource.category} />
-                                <ScopeBadge scope={resource.scope || ResourceScope.Internal} />
-                            </div>
-                            {resource.linkUrl && (
-                                <div className="text-[10px] text-slate-400 mt-0.5">
-                                    <ExternalLink size={14} className="text-slate-300 group-hover:text-blue-500 transition-colors" />
-                                </div>
-                            )}
-                        </div>
+                    {/* 2. Description Preview */}
+                    <div className="mt-1 mb-3">
+                        <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed">
+                            {resource.description || <span className="italic opacity-50">No description provided.</span>}
+                        </p>
+                    </div>
+
+                    {/* 3. Metadata Row (Badges) */}
+                    <div className="flex flex-wrap items-center gap-2 mt-auto">
+                        <CategoryBadge category={resource.category} />
+                        <ScopeBadge scope={resource.scope || ResourceScope.Internal} />
+                        
+                        {/* Topics */}
+                        {resource.topics && resource.topics.split(',').map((topic, i) => (
+                            <span key={i} className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-50 text-slate-600 border border-slate-200">
+                                {topic.trim()}
+                            </span>
+                        ))}
+                    </div>
+
+                    {/* 4. Footer Row (Timing) */}
+                    <div className="border-t border-slate-50 mt-3 pt-2 flex justify-end">
+                         <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-medium">
+                            <Clock size={10} />
+                            <span>Updated {resource.lastUpdated}</span>
+                         </div>
                     </div>
                 </div>
             ))}
