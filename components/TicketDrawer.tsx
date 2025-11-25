@@ -44,7 +44,7 @@ const TextArea = ({ value, onChange, placeholder, className = "" }: any) => (
         value={value || ''} 
         onChange={onChange} 
         placeholder={placeholder}
-        className={`w-full px-3 py-2 bg-white border border-slate-300 rounded text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none ${className}`}
+        className={`w-full px-3 py-2 bg-white border border-slate-300 rounded text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-y ${className}`}
     />
   );
 
@@ -319,10 +319,9 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
                         )}
                     </div>
 
-                    <div className="p-6 space-y-8">
+                    <div className="p-6 space-y-6">
                         {/* 3. Dates Section */}
-                        <div>
-                             <SectionHeader>Dates</SectionHeader>
+                        <div className="border-b border-slate-100 pb-4">
                              <div className="grid grid-cols-3 gap-8">
                                 {isEditing ? (
                                     <>
@@ -347,7 +346,6 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
 
                         {/* 4. Tracking & Ownership */}
                         <div>
-                            <SectionHeader>Tracking & Ownership</SectionHeader>
                             <div className="grid grid-cols-2 gap-x-12 gap-y-6">
                                 {/* Submitter & Client */}
                                 <div>
@@ -416,40 +414,43 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
                                     ) : renderField('FP Ticket Number', formData.fpTicketNumber)}
                                 </div>
                                 <div>
-                                    {/* Empty Column for grid alignment as requested, or can put something else here if needed */}
+                                    {/* Empty Column for grid alignment */}
                                 </div>
 
                                 {/* Thread ID - Full Width */}
                                 <div className="col-span-2">
                                      {isEditing ? (
                                          <div><FieldLabel>Ticket Thread ID</FieldLabel><Input value={formData.ticketThreadId} onChange={(e: any) => handleChange('ticketThreadId', e.target.value)} /></div>
-                                    ) : renderField('Ticket Thread ID', <span className="font-mono text-xs text-slate-500">{formData.ticketThreadId}</span>)}
+                                    ) : renderField('Ticket Thread ID', <span className="font-mono text-sm text-slate-500">{formData.ticketThreadId}</span>)}
                                 </div>
                             </div>
                         </div>
 
-                        {/* 5. Issue Summary */}
-                        <div>
-                            <SectionHeader>Issue Summary</SectionHeader>
-                            {isEditing ? (
-                                <Input value={formData.summary} onChange={(e: any) => handleChange('summary', e.target.value)} placeholder="Brief summary..." />
-                            ) : (
-                                <p className="text-lg text-slate-800 font-medium leading-relaxed">{formData.summary || <span className="text-slate-400 italic text-sm">No summary provided.</span>}</p>
-                            )}
-                        </div>
-
-                        {/* 6. Details */}
+                        {/* 5. Issue Summary & 6. Details Wrapper */}
                         <div>
                             <SectionHeader>Details</SectionHeader>
-                            {isEditing ? (
-                                <TextArea value={formData.details} onChange={(e: any) => handleChange('details', e.target.value)} className="h-48" placeholder="Full details..." />
-                            ) : (
-                                <div className="bg-slate-50 rounded-md border border-slate-200 p-4 min-h-[200px] max-h-[300px] overflow-y-auto custom-scrollbar">
-                                    <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
-                                        {formData.details || <span className="text-slate-400 italic">No details provided.</span>}
-                                    </p>
-                                </div>
-                            )}
+                            
+                            {/* Summary */}
+                            <div className="mb-4">
+                                {isEditing ? (
+                                    <Input value={formData.summary} onChange={(e: any) => handleChange('summary', e.target.value)} placeholder="Brief summary..." />
+                                ) : (
+                                    <p className="text-sm text-slate-800 font-normal leading-relaxed">{formData.summary || <span className="text-slate-400 italic text-sm">No summary provided.</span>}</p>
+                                )}
+                            </div>
+
+                            {/* Long Details */}
+                            <div>
+                                {isEditing ? (
+                                    <TextArea value={formData.details} onChange={(e: any) => handleChange('details', e.target.value)} className="h-48" placeholder="Full details..." />
+                                ) : (
+                                    <div className="bg-slate-50 rounded-md border border-slate-200 p-4 min-h-[200px] max-h-[300px] overflow-y-auto custom-scrollbar">
+                                        <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+                                            {formData.details || <span className="text-slate-400 italic">No details provided.</span>}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* 7. Activity */}
@@ -505,7 +506,7 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
                                         value={newUpdateText} 
                                         onChange={(e: any) => setNewUpdateText(e.target.value)} 
                                         placeholder="Type your comment or update here..." 
-                                        rows={3}
+                                        rows={6}
                                     />
                                     <div className="flex justify-end mt-3">
                                         <button 

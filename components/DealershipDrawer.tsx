@@ -517,7 +517,7 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
                                             {isEditing ? (
                                                 <input 
                                                     type="date" 
-                                                    className="w-full bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-xs focus:outline-none focus:border-primary"
+                                                    className="w-full bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-sm focus:outline-none focus:border-primary"
                                                     value={toInputDate(order.receivedDate)}
                                                     onChange={(e) => handleOrderChange(order.id, 'receivedDate', fromInputDate(e.target.value))}
                                                 />
@@ -529,7 +529,7 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
                                             {isEditing ? (
                                                 <input 
                                                     type="number" 
-                                                    className="w-full bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-xs focus:outline-none focus:border-primary"
+                                                    className="w-full bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-sm focus:outline-none focus:border-primary"
                                                     value={order.orderNumber || ''}
                                                     onChange={(e) => handleOrderChange(order.id, 'orderNumber', parseInt(e.target.value) || 0)}
                                                     placeholder="#"
@@ -541,7 +541,7 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
                                             {/* Product */}
                                             {isEditing ? (
                                                 <select 
-                                                    className="w-full bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-xs focus:outline-none focus:border-primary"
+                                                    className="w-full bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-sm focus:outline-none focus:border-primary"
                                                     value={order.productId}
                                                     onChange={(e) => handleOrderChange(order.id, 'productId', e.target.value)}
                                                 >
@@ -569,7 +569,7 @@ export default function DealershipDrawer({ isOpen, onClose, dealership, onUpdate
                                                     <span className="absolute left-1 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
                                                     <input 
                                                         type="number"
-                                                        className="w-full pl-3 pr-1 py-0.5 bg-slate-50 border border-slate-200 rounded text-xs focus:outline-none focus:border-primary text-right"
+                                                        className="w-full pl-3 pr-1 py-0.5 bg-slate-50 border border-slate-200 rounded text-sm focus:outline-none focus:border-primary text-right"
                                                         value={order.price}
                                                         onChange={(e) => handleOrderChange(order.id, 'price', parseFloat(e.target.value) || 0)}
                                                     />
