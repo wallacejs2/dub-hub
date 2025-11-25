@@ -21,7 +21,7 @@ const getStatusColorClasses = (status: Status) => {
 const StatusBadge = ({ status }: { status: Status }) => {
   const colors = getStatusColorClasses(status);
   return (
-    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide border ${colors.bg} ${colors.text} ${colors.border}`}>
+    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${colors.bg} ${colors.text} ${colors.border}`}>
       {status}
     </span>
   );
@@ -35,7 +35,7 @@ const PriorityBadge = ({ priority }: { priority: Priority }) => {
     [Priority.P4]: 'bg-blue-50 text-blue-700 border-blue-200',   // P4 Blue
   };
   return (
-    <span className={`px-2 py-0.5 rounded text-[11px] font-bold border ${colors[priority]}`}>
+    <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${colors[priority]}`}>
       {priority}
     </span>
   );
@@ -43,29 +43,29 @@ const PriorityBadge = ({ priority }: { priority: Priority }) => {
 
 const TypeBadge = ({ type }: { type: TicketType }) => {
     const colors = {
-        [TicketType.FeatureRequest]: 'text-emerald-600 bg-emerald-50 border-emerald-100',
-        [TicketType.Issue]: 'text-rose-600 bg-rose-50 border-rose-100',
-        [TicketType.Question]: 'text-blue-600 bg-blue-50 border-blue-100',
+        [TicketType.FeatureRequest]: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+        [TicketType.Issue]: 'text-rose-700 bg-rose-50 border-rose-200',
+        [TicketType.Question]: 'text-blue-700 bg-blue-50 border-blue-200',
     }
-    return <span className={`px-2 py-0.5 rounded-md text-[11px] font-bold border ${colors[type]}`}>{type}</span>;
+    return <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${colors[type]} whitespace-nowrap`}>{type}</span>;
 };
 
 // Helper for Product Area Colors
 const getProductAreaColor = (area: ProductArea) => {
     switch (area) {
-        case ProductArea.Fullpath: return 'text-orange-600'; // Orange
-        case ProductArea.Reynolds: return 'text-blue-900';   // Navy Blue
-        default: return 'text-slate-500';
+        case ProductArea.Fullpath: return 'text-orange-700 bg-orange-50 border-orange-100'; 
+        case ProductArea.Reynolds: return 'text-blue-800 bg-blue-50 border-blue-100';   
+        default: return 'text-slate-600 bg-slate-50 border-slate-200';
     }
 };
 
 // Helper for Platform Colors
 const getPlatformColor = (platform: Platform) => {
     switch (platform) {
-        case Platform.FOCUS: return 'text-orange-600'; // Orange
-        case Platform.UCP: return 'text-blue-600';     // Blue
-        case Platform.Curator: return 'text-purple-600'; // Purple
-        default: return 'text-slate-500';
+        case Platform.FOCUS: return 'text-orange-700 bg-orange-50 border-orange-100'; 
+        case Platform.UCP: return 'text-blue-700 bg-blue-50 border-blue-100';     
+        case Platform.Curator: return 'text-purple-700 bg-purple-50 border-purple-100'; 
+        default: return 'text-slate-600 bg-slate-50 border-slate-200';
     }
 };
 
@@ -73,11 +73,11 @@ const getPlatformColor = (platform: Platform) => {
 const ReferenceBadge = ({ label, value, link }: { label: string, value: string | number, link?: string }) => {
   const content = (
     <>
-      <Hash size={10} className="opacity-50" /> <span className="font-semibold">{label}:</span> {value}
+      <span className="font-semibold opacity-70 mr-1">{label}:</span>{value}
     </>
   );
   
-  const baseClasses = "inline-flex items-center gap-1 px-1.5 py-0.5 bg-white text-slate-600 text-[10px] rounded border border-slate-200 transition-all shadow-sm";
+  const baseClasses = "inline-flex items-center px-1.5 py-0.5 bg-slate-50 text-slate-600 text-[10px] rounded border border-slate-200 whitespace-nowrap";
   
   if (link) {
     return (
@@ -86,11 +86,11 @@ const ReferenceBadge = ({ label, value, link }: { label: string, value: string |
         target="_blank" 
         rel="noreferrer"
         onClick={(e) => e.stopPropagation()} // Prevent drawer opening when clicking the link
-        className={`${baseClasses} hover:border-blue-300 hover:text-blue-600 hover:shadow-md cursor-pointer group/link`}
+        className={`${baseClasses} hover:border-blue-300 hover:text-blue-600 hover:bg-white cursor-pointer group/link`}
         title={`Open ${label} Link`}
       >
         {content}
-        <ExternalLinkIcon size={8} className="opacity-0 group-hover/link:opacity-100 transition-opacity" />
+        <ExternalLinkIcon size={8} className="ml-1 opacity-0 group-hover/link:opacity-100 transition-opacity" />
       </a>
     );
   }
@@ -301,7 +301,6 @@ export default function TicketList({
              />
           </div>
           
-          {/* Status Filter */}
           <select 
             className="py-2 px-3 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:border-primary"
             value={filters.status}
@@ -311,7 +310,6 @@ export default function TicketList({
             {Object.values(Status).map(s => <option key={s} value={s}>{s}</option>)}
           </select>
 
-           {/* Priority Filter */}
            <select 
             className="py-2 px-3 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:border-primary"
             value={filters.priority}
@@ -321,7 +319,6 @@ export default function TicketList({
             {Object.values(Priority).map(p => <option key={p} value={p}>{p}</option>)}
           </select>
 
-           {/* Type Filter */}
            <select 
             className="py-2 px-3 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:border-primary"
             value={filters.type}
@@ -331,7 +328,6 @@ export default function TicketList({
             {Object.values(TicketType).map(t => <option key={t} value={t}>{t}</option>)}
           </select>
 
-           {/* Product Area Filter */}
            <select 
             className="py-2 px-3 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:border-primary"
             value={filters.productArea}
@@ -342,7 +338,6 @@ export default function TicketList({
           </select>
         </div>
 
-        {/* Bulk Actions */}
         {selectedTicketIds.size > 0 && (
             <div className="flex items-center gap-2 animate-fadeIn">
                 <span className="text-sm text-slate-500 mr-2">{selectedTicketIds.size} selected</span>
@@ -367,8 +362,8 @@ export default function TicketList({
         )}
       </div>
 
-      {/* Ticket Stack (Vertical List) */}
-      <div className="flex flex-col space-y-4">
+      {/* Ticket List */}
+      <div className="flex flex-col space-y-3">
         {filteredTickets.length === 0 ? (
             <div className="text-center py-16 text-slate-400 bg-white rounded-xl border border-slate-200 border-dashed">
                 No tickets found matching your criteria.
@@ -378,15 +373,16 @@ export default function TicketList({
                 <div 
                     key={ticket.id}
                     className={`
-                        group relative bg-white rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-md cursor-pointer flex flex-col
-                        ${selectedTicketIds.has(ticket.id) ? 'border-primary ring-1 ring-primary bg-blue-50/30' : 'border-slate-200 hover:border-blue-200'}
+                        group relative bg-white rounded-xl border p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:border-blue-300 cursor-pointer flex flex-col
+                        ${selectedTicketIds.has(ticket.id) ? 'border-primary ring-1 ring-primary bg-blue-50/30' : 'border-slate-200'}
                     `}
                     onClick={() => onOpenTicket(ticket.id)}
                 >
-                    {/* Header Row: Checkbox/Type/Client/Area/Platform/Location (Left) -- Status/Priority (Right) */}
-                    <div className="flex justify-between items-start mb-3">
-                        <div className="flex flex-wrap items-center gap-3">
-                            <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
+                    {/* 1. Top Row: Context & Metadata */}
+                    <div className="flex items-center justify-between mb-3 gap-3">
+                        {/* Left: Type & Labels */}
+                        <div className="flex flex-wrap items-center gap-2 min-w-0">
+                            <div className="flex items-center pr-1" onClick={(e) => e.stopPropagation()}>
                                 <input 
                                     type="checkbox" 
                                     className="rounded border-slate-300 text-primary focus:ring-primary cursor-pointer w-4 h-4"
@@ -396,34 +392,30 @@ export default function TicketList({
                             </div>
                             
                             <TypeBadge type={ticket.type} />
-
-                            {/* Client Display */}
-                            <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium px-2 py-0.5 bg-slate-50 rounded border border-slate-100" title={`Client: ${ticket.client}`}>
-                                <Building2 size={12} className="text-slate-400" />
-                                <span className="truncate max-w-[180px]">{ticket.client}</span>
-                            </div>
-
-                            {/* Product Area */}
-                            <div className={`flex items-center gap-1.5 text-xs font-semibold ${getProductAreaColor(ticket.productArea)}`}>
-                                <LayoutGrid size={14} className="text-current opacity-75" />
-                                <span>{ticket.productArea}</span>
-                            </div>
                             
-                            {/* Platform */}
-                            <div className={`flex items-center gap-1.5 text-xs font-semibold ${getPlatformColor(ticket.platform)}`}>
-                                <Server size={14} className="text-current opacity-75" />
-                                <span>{ticket.platform}</span>
+                            {/* Context Labels */}
+                            <div className="flex flex-wrap items-center gap-1.5">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-50 text-slate-600 border border-slate-200 truncate max-w-[150px]">
+                                    <Building2 size={10} className="text-slate-400" /> {ticket.client}
+                                </span>
+
+                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${getProductAreaColor(ticket.productArea)}`}>
+                                    {ticket.productArea}
+                                </span>
+
+                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${getPlatformColor(ticket.platform)}`}>
+                                    {ticket.platform}
+                                </span>
+
+                                {ticket.location && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-50 text-slate-500 border border-slate-200 truncate max-w-[120px]">
+                                        <MapPin size={10} className="text-slate-400" /> {ticket.location}
+                                    </span>
+                                )}
                             </div>
-                            
-                            {/* Location */}
-                            {ticket.location && (
-                                <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                                    <MapPin size={14} className="text-slate-400" />
-                                    <span className="truncate max-w-[200px]">{ticket.location}</span>
-                                </div>
-                            )}
                         </div>
 
+                        {/* Right: Status, Priority, Favorite */}
                         <div className="flex items-center gap-2 shrink-0">
                              <StatusBadge status={ticket.status} />
                              <PriorityBadge priority={ticket.priority} />
@@ -431,70 +423,58 @@ export default function TicketList({
                                 onClick={(e) => onToggleFavorite(ticket.id, e)}
                                 className={`ml-1 p-1.5 rounded-full transition-colors hover:bg-slate-100 ${ticket.isFavorite ? 'text-yellow-400' : 'text-slate-200 group-hover:text-slate-300'}`}
                             >
-                                <Star size={18} fill={ticket.isFavorite ? "currentColor" : "none"} />
+                                <Star size={16} fill={ticket.isFavorite ? "currentColor" : "none"} />
                             </button>
                         </div>
                     </div>
 
-                    {/* Content Body */}
-                    <div className="mb-4 pl-7">
-                        <h3 className="text-lg font-bold text-slate-900 leading-tight mb-2" title={ticket.title}>
-                            {ticket.title}
-                        </h3>
-                        
-                        {/* Status Reason (Boxed matching Status Color) */}
-                        {ticket.reason && (
-                            <div className="mb-2">
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium border ${getStatusColorClasses(ticket.status).bg} ${getStatusColorClasses(ticket.status).text} ${getStatusColorClasses(ticket.status).border}`}>
+                    {/* 2. Middle Content: Title & Summary */}
+                    <div className="mb-3 pl-7"> 
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <h3 className="text-base font-bold text-slate-900 leading-tight truncate">
+                                {ticket.title}
+                            </h3>
+                            {/* Inline Status Reason */}
+                            {ticket.reason && (
+                                <span className={`shrink-0 px-1.5 py-0.5 rounded text-[10px] font-medium border ${getStatusColorClasses(ticket.status).bg} ${getStatusColorClasses(ticket.status).text} ${getStatusColorClasses(ticket.status).border}`}>
                                     {ticket.reason}
                                 </span>
-                            </div>
-                        )}
+                            )}
+                        </div>
 
-                        {/* Summary Display */}
-                        {ticket.summary && (
-                             <p className="text-[11px] text-slate-500 italic line-clamp-2 border-l-2 border-slate-200 pl-3 py-0.5">
-                                {ticket.summary}
-                             </p>
-                        )}
+                        {/* Summary */}
+                        <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                            {ticket.summary || <span className="italic opacity-50">No summary provided</span>}
+                        </p>
                     </div>
 
-                    {/* Footer Separator */}
-                    <div className="h-px bg-slate-100 w-full mb-3"></div>
-
-                    {/* Footer Row: External Refs Left -- Dates Right */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pl-1">
-                        {/* External Reference Badges */}
-                        <div className="flex flex-wrap gap-2">
-                            {ticket.fpTicketNumber && (
-                                <ReferenceBadge label="FP" value={ticket.fpTicketNumber.toString()} />
+                    {/* 3. Footer Row: Meta Info */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pl-7 pt-2 border-t border-slate-50 mt-auto">
+                        <div className="flex flex-wrap items-center gap-2">
+                             {ticket.pmrNumber && (
+                                <ReferenceBadge label="PMR" value={ticket.pmrNumber} link={ticket.pmrLink} />
                             )}
                             {ticket.ticketThreadId && (
                                 <ReferenceBadge label="Thread" value={ticket.ticketThreadId} />
                             )}
-                            {ticket.pmrNumber && (
-                                <ReferenceBadge label="PMR" value={ticket.pmrNumber.toString()} link={ticket.pmrLink} />
+                            {ticket.fpTicketNumber && (
+                                <ReferenceBadge label="FP" value={ticket.fpTicketNumber} />
                             )}
-                            {ticket.pmgNumber && (
-                                <ReferenceBadge label="PMG" value={ticket.pmgNumber.toString()} link={ticket.pmgLink} />
+                             {ticket.pmgNumber && (
+                                <ReferenceBadge label="PMG" value={ticket.pmgNumber} link={ticket.pmgLink} />
                             )}
                             {ticket.cpmNumber && (
-                                <ReferenceBadge label="CPM" value={ticket.cpmNumber.toString()} link={ticket.cpmLink} />
+                                <ReferenceBadge label="CPM" value={ticket.cpmNumber} link={ticket.cpmLink} />
                             )}
                         </div>
 
-                        {/* Dates */}
-                        <div className="flex items-center gap-4 text-[10px] text-slate-400 font-medium">
-                            <div className="flex items-center gap-1">
-                                <Calendar size={12} className="text-slate-300" />
-                                <span>Updated {ticket.lastUpdatedDate}</span>
-                            </div>
-                            
+                        <div className="flex items-center gap-3 text-[10px] text-slate-400 font-medium whitespace-nowrap ml-auto sm:ml-0">
+                            <span>Updated {ticket.lastUpdatedDate}</span>
                             {getDaysActive(ticket.startDate) !== null && (
-                                <div className="flex items-center gap-1">
-                                    <Clock size={12} className="text-slate-300" />
-                                    <span>{getDaysActive(ticket.startDate)} Days Active</span>
-                                </div>
+                                <span className="flex items-center gap-1">
+                                    <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                                    {getDaysActive(ticket.startDate)} Days Active
+                                </span>
                             )}
                         </div>
                     </div>

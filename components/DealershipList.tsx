@@ -5,14 +5,22 @@ import { Filter, Plus, Building2 } from 'lucide-react';
 
 const StatusBadge = ({ status }: { status: DealershipStatus }) => {
     const colors = {
-        [DealershipStatus.DMTPending]: 'bg-yellow-100 text-yellow-800',
-        [DealershipStatus.DMTApproved]: 'bg-blue-100 text-blue-800',
-        [DealershipStatus.Onboarding]: 'bg-purple-100 text-purple-800',
-        [DealershipStatus.Live]: 'bg-green-100 text-green-800',
-        [DealershipStatus.Cancelled]: 'bg-red-100 text-red-800',
+        [DealershipStatus.DMTPending]: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+        [DealershipStatus.DMTApproved]: 'bg-blue-100 text-blue-800 border-blue-200',
+        [DealershipStatus.Onboarding]: 'bg-purple-100 text-purple-800 border-purple-200',
+        [DealershipStatus.Live]: 'bg-green-100 text-green-800 border-green-200',
+        [DealershipStatus.Cancelled]: 'bg-red-50 text-red-700 border-red-100',
     };
-    return <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${colors[status]}`}>{status}</span>;
+    return <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border whitespace-nowrap ${colors[status]}`}>{status}</span>;
 };
+
+// Helper component for Meta Fields in the bottom row
+const MetaField = ({ label, value }: { label: string, value: React.ReactNode }) => (
+    <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded border border-slate-100">
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{label}</span>
+        <span className="text-xs font-medium text-slate-700 font-mono">{value}</span>
+    </div>
+);
 
 interface DealershipListProps {
   dealerships: Dealership[];
@@ -117,60 +125,40 @@ export default function DealershipList({
                 filteredDealerships.map((dealership) => (
                     <div 
                         key={dealership.id}
-                        className="group relative bg-white rounded-lg border border-slate-200 p-4 shadow-sm transition-all hover:shadow-md hover:border-slate-300 cursor-pointer"
+                        className="group relative bg-white rounded-lg border border-slate-200 p-4 shadow-sm transition-all hover:shadow-md hover:border-blue-300 cursor-pointer"
                         onClick={() => onOpenDealership(dealership.id)}
                     >
-                        <div className="flex justify-between items-start">
-                            <div>
-                                {/* Header: CIF - Account Name */}
-                                <div className="flex items-center gap-2 mb-2">
-                                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs font-bold font-mono">
-                                         {dealership.accountNumber}
-                                    </div>
-                                    <h3 className="font-bold text-slate-800 text-lg">{dealership.accountName}</h3>
+                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                            
+                            {/* Left Side: Info */}
+                            <div className="flex-1 min-w-0 flex flex-col gap-2">
+                                
+                                {/* 1. Top Line: CIF & CRM */}
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                                        CIF {dealership.accountNumber}
+                                    </span>
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100 uppercase">
+                                        {dealership.crmProvider || 'N/A'}
+                                    </span>
                                 </div>
 
-                                {/* Body Grid */}
-                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mt-3 text-xs text-slate-600">
-                                    {/* 1. CRM Provider */}
-                                    <div className="flex flex-col">
-                                        <span className="uppercase font-bold text-[10px] text-slate-400 mb-0.5">CRM</span>
-                                        <span className="font-medium">
-                                             {dealership.crmProvider || 'N/A'}
-                                        </span>
-                                    </div>
-                                    {/* 2. ERA ID */}
-                                    <div className="flex flex-col">
-                                        <span className="uppercase font-bold text-[10px] text-slate-400 mb-0.5">ERA ID</span>
-                                        <span className="font-medium">
-                                             {dealership.eraSystemId || 'N/A'}
-                                        </span>
-                                    </div>
-                                    {/* 3. Store / Branch */}
-                                    <div className="flex flex-col">
-                                        <span className="uppercase font-bold text-[10px] text-slate-400 mb-0.5">Store / Branch</span>
-                                        <span className="font-medium">
-                                             {dealership.storeNumber || '-'} / {dealership.branchNumber || '-'}
-                                        </span>
-                                    </div>
-                                    {/* 4. PPSysID */}
-                                    <div className="flex flex-col">
-                                        <span className="uppercase font-bold text-[10px] text-slate-400 mb-0.5">PPSysID</span>
-                                        <span className="font-medium">
-                                             {dealership.ppSysId || 'N/A'}
-                                        </span>
-                                    </div>
-                                    {/* 5. Go-Live */}
-                                    <div className="flex flex-col">
-                                        <span className="uppercase font-bold text-[10px] text-slate-400 mb-0.5">Go-Live</span>
-                                        <span className="font-medium">
-                                             {dealership.goLiveDate || 'Pending'}
-                                        </span>
-                                    </div>
+                                {/* 2. Middle Row: Name */}
+                                <h3 className="text-lg font-bold text-slate-900 truncate leading-tight">
+                                    {dealership.accountName}
+                                </h3>
+
+                                {/* 3. Bottom Row: IDs & Go-Live */}
+                                <div className="flex flex-wrap items-center gap-2 mt-1">
+                                    <MetaField label="ERA ID" value={dealership.eraSystemId || 'N/A'} />
+                                    <MetaField label="Store / Branch" value={`${dealership.storeNumber || '-'} / ${dealership.branchNumber || '-'}`} />
+                                    <MetaField label="PPSysID" value={dealership.ppSysId || 'N/A'} />
+                                    <MetaField label="Go-Live" value={dealership.goLiveDate || 'Pending'} />
                                 </div>
                             </div>
 
-                            <div className="flex flex-col items-end gap-2">
+                            {/* Right Side: Status */}
+                            <div className="shrink-0">
                                 <StatusBadge status={dealership.status} />
                             </div>
                         </div>
