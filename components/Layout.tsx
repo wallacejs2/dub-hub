@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { LayoutDashboard, Ticket, Settings, Bell, Search, Building2, FileText } from 'lucide-react';
+import { LayoutDashboard, Ticket, Settings, Bell, Search, Building2, FileText, CheckSquare } from 'lucide-react';
 
-export type ViewMode = 'tickets' | 'dealerships' | 'resources';
+export type ViewMode = 'tickets' | 'dealerships' | 'resources' | 'tasks';
 
 const SidebarItem = ({ icon: Icon, label, active, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) => (
   <div 
@@ -40,6 +40,12 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
             onClick={() => onNavigate('tickets')}
           />
           <SidebarItem 
+            icon={CheckSquare} 
+            label="Tasks" 
+            active={currentView === 'tasks'} 
+            onClick={() => onNavigate('tasks')}
+          />
+          <SidebarItem 
             icon={Building2} 
             label="Dealerships" 
             active={currentView === 'dealerships'} 
@@ -58,9 +64,9 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 lg:px-8">
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 lg:px-8 shrink-0">
            <h1 className="text-xl font-semibold text-slate-800">
-             {currentView === 'tickets' ? 'Tickets' : currentView === 'dealerships' ? 'Dealerships' : 'Resources'}
+             {currentView === 'tickets' ? 'Tickets' : currentView === 'dealerships' ? 'Dealerships' : currentView === 'resources' ? 'Resources' : 'Tasks'}
            </h1>
            
            <div className="flex items-center gap-4">
@@ -81,7 +87,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-7xl mx-auto h-full flex flex-col">
             {children}
           </div>
         </main>

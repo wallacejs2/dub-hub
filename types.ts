@@ -194,3 +194,24 @@ export interface Resource {
   navigationPath: string;
   lastUpdated: string;
 }
+
+// --- Task Types ---
+
+export enum TaskStatus {
+  ToDo = 'To Do',
+  InProgress = 'In Progress',
+  Blocked = 'Blocked',
+  Completed = 'Completed'
+}
+
+export interface Task {
+  id: string;
+  title: string;
+  description: string;
+  status: TaskStatus;
+  priority: Priority;
+  dueDate: string; // MM/DD/YYYY
+  assignee: string;
+  createdDate: string;
+  lastUpdatedDate: string;
+}

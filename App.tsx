@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { Ticket, Status, TicketFilterState, TicketType, Priority, ProductArea, Update, Dealership, CRMProvider, Resource, ResourceScope } from './types';
-import { generateMockTickets, createEmptyTicket, generateMockDealerships, createEmptyDealership, generateMockResources, createEmptyResource } from './mockData';
+import { Ticket, Status, TicketFilterState, TicketType, Priority, ProductArea, Update, Dealership, CRMProvider, Resource, ResourceScope, Task, TaskStatus } from './types';
+import { generateMockTickets, createEmptyTicket, generateMockDealerships, createEmptyDealership, generateMockResources, createEmptyResource, generateMockTasks, createEmptyTask } from './mockData';
 import { getTodayDateString } from './utils';
 import Layout, { ViewMode } from './components/Layout';
 import TicketList from './components/TicketList';
@@ -10,6 +10,8 @@ import DealershipList from './components/DealershipList';
 import DealershipDrawer from './components/DealershipDrawer';
 import ResourceList from './components/ResourceList';
 import ResourceDrawer from './components/ResourceDrawer';
+import TaskList from './components/TaskList';
+import TaskDetailPane from './components/TaskDetailPane';
 import { ToastProvider, useToast } from './components/Toast';
 
 function AppContent() {
@@ -88,6 +90,25 @@ function AppContent() {
   const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null);
   const [draftResource, setDraftResource] = useState<Resource | null>(null);
 
+  // --- State: Tasks ---
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    try {
+        const savedData = localStorage.getItem('dubhub-tasks');
+        if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            const empty = createEmptyTask();
+            return parsedData.map((t: any) => ({
+                ...empty,
+                ...t
+            }));
+        }
+    } catch (error) {
+        console.error("Failed to parse task data:", error);
+    }
+    return generateMockTasks();
+  });
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+
   const { addToast } = useToast();
 
   // --- Persistence ---
@@ -102,6 +123,11 @@ function AppContent() {
   useEffect(() => {
     localStorage.setItem('dubhub-resources', JSON.stringify(resources));
   }, [resources]);
+
+  useEffect(() => {
+    localStorage.setItem('dubhub-tasks', JSON.stringify(tasks));
+  }, [tasks]);
+
 
   // --- Ticket Logic ---
 
@@ -226,6 +252,27 @@ function AppContent() {
       }
   }, [addToast]);
 
+  // --- Task Logic ---
+
+  const handleAddTask = useCallback((title: string) => {
+      const newTask = createEmptyTask();
+      newTask.title = title;
+      setTasks(prev => [newTask, ...prev]);
+      setSelectedTaskId(newTask.id);
+      addToast('Task added', 'success');
+  }, [addToast]);
+
+  const handleUpdateTask = useCallback((updatedTask: Task) => {
+      setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t));
+      addToast('Task updated', 'success');
+  }, [addToast]);
+
+  const handleDeleteTask = useCallback((id: string) => {
+      setTasks(prev => prev.filter(t => t.id !== id));
+      setSelectedTaskId(null);
+      addToast('Task deleted', 'success');
+  }, [addToast]);
+
   // --- Computed ---
 
   const selectedTicket = useMemo(
@@ -245,6 +292,10 @@ function AppContent() {
       if (selectedResourceId === 'NEW') return draftResource;
       return resources.find(r => r.id === selectedResourceId);
   }, [resources, selectedResourceId, draftResource]);
+
+  const selectedTask = useMemo(() => {
+      return tasks.find(t => t.id === selectedTaskId) || null;
+  }, [tasks, selectedTaskId]);
 
   // --- Render ---
 
@@ -309,6 +360,23 @@ function AppContent() {
                             isNew={selectedResourceId === 'NEW'}
                         />
                     </>
+                );
+            case 'tasks':
+                return (
+                    <div className="flex h-full border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+                        <TaskList 
+                            tasks={tasks}
+                            selectedTaskId={selectedTaskId}
+                            onSelectTask={setSelectedTaskId}
+                            onAddTask={handleAddTask}
+                            onUpdateTask={handleUpdateTask}
+                        />
+                        <TaskDetailPane 
+                            task={selectedTask}
+                            onUpdateTask={handleUpdateTask}
+                            onDeleteTask={handleDeleteTask}
+                        />
+                    </div>
                 );
             default:
                 return null;

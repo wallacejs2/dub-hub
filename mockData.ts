@@ -1,5 +1,5 @@
 
-import { Ticket, TicketType, Status, Priority, ProductArea, Platform, Dealership, DealershipStatus, ReynoldsSolution, FullpathSolution, DMTProduct, CRMProvider, Resource, ResourceCategory, ResourceScope } from './types';
+import { Ticket, TicketType, Status, Priority, ProductArea, Platform, Dealership, DealershipStatus, ReynoldsSolution, FullpathSolution, DMTProduct, CRMProvider, Resource, ResourceCategory, ResourceScope, Task, TaskStatus } from './types';
 import { getTodayDateString } from './utils';
 
 export const mockClients = [
@@ -316,6 +316,58 @@ export const generateMockResources = (): Resource[] => {
       linkUrl: 'https://example.com/schema.xml',
       navigationPath: 'Tech > Specs',
       lastUpdated: '12/05/2023'
+    }
+  ];
+};
+
+// --- Tasks ---
+
+export const createEmptyTask = (): Task => ({
+  id: `TASK-${Date.now()}`,
+  title: '',
+  description: '',
+  status: TaskStatus.ToDo,
+  priority: Priority.P3,
+  dueDate: '',
+  assignee: 'Me',
+  createdDate: getTodayDateString(),
+  lastUpdatedDate: getTodayDateString()
+});
+
+export const generateMockTasks = (): Task[] => {
+  return [
+    {
+      id: 'TASK-001',
+      title: 'Review Q3 Sales Data',
+      description: 'Analyze the Q3 spreadsheet and prepare a summary slide.',
+      status: TaskStatus.ToDo,
+      priority: Priority.P2,
+      dueDate: '06/15/2024',
+      assignee: 'Me',
+      createdDate: '06/01/2024',
+      lastUpdatedDate: '06/01/2024'
+    },
+    {
+      id: 'TASK-002',
+      title: 'Update API Documentation',
+      description: 'Add new endpoints for the v2 release.',
+      status: TaskStatus.InProgress,
+      priority: Priority.P1,
+      dueDate: '06/10/2024',
+      assignee: 'Me',
+      createdDate: '05/28/2024',
+      lastUpdatedDate: '06/02/2024'
+    },
+    {
+      id: 'TASK-003',
+      title: 'Client Onboarding Call',
+      description: 'Kickoff call with North Georgia Toyota.',
+      status: TaskStatus.Completed,
+      priority: Priority.P3,
+      dueDate: '05/30/2024',
+      assignee: 'Jane Doe',
+      createdDate: '05/20/2024',
+      lastUpdatedDate: '05/30/2024'
     }
   ];
 };
