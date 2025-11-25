@@ -1,7 +1,8 @@
+
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Ticket, Status, Priority, TicketType, ProductArea, Platform, Update, Dealership } from '../types';
-import { getTodayDateString, toInputDate, fromInputDate } from '../utils';
-import { X, Calendar, Copy, Trash2, Edit2, Save, Link as LinkIcon, Plus } from 'lucide-react';
+import { getTodayDateString, toInputDate, fromInputDate, getDaysActive } from '../utils';
+import { X, Calendar, Copy, Trash2, Edit2, Save, Link as LinkIcon, Plus, Clock, User, Hash, Globe } from 'lucide-react';
 import { useToast } from './Toast';
 
 interface TicketDrawerProps {
@@ -17,13 +18,13 @@ interface TicketDrawerProps {
 // --- Styled Components ---
 
 const SectionHeader = ({ children }: { children?: React.ReactNode }) => (
-  <h3 className="text-sm font-bold text-slate-800 mt-8 mb-4 pb-1 border-b border-slate-100">
+  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2 mt-6 first:mt-0">
     {children}
   </h3>
 );
 
 const FieldLabel = ({ children }: { children?: React.ReactNode }) => (
-  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
     {children}
   </label>
 );
@@ -34,7 +35,7 @@ const Input = ({ type = "text", value, onChange, placeholder, className = "" }: 
       value={value || ''} 
       onChange={onChange} 
       placeholder={placeholder}
-      className={`w-full px-3 py-1.5 bg-white border border-slate-300 rounded text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all ${className}`}
+      className={`w-full px-2 py-1.5 bg-white border border-slate-300 rounded text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all ${className}`}
   />
 );
 
@@ -52,7 +53,7 @@ const Select = ({ value, onChange, options }: any) => (
       <select 
           value={value} 
           onChange={onChange} 
-          className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none appearance-none"
+          className="w-full px-2 py-1.5 bg-white border border-slate-300 rounded text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none appearance-none"
       >
           {options.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
       </select>
@@ -66,53 +67,39 @@ const Select = ({ value, onChange, options }: any) => (
 
 const StatusBadge = ({ status }: { status: Status }) => {
     const colors = {
-      [Status.NotStarted]: 'bg-gray-100 text-gray-700',
-      [Status.InProgress]: 'bg-blue-100 text-blue-700',
-      [Status.PMReview]: 'bg-purple-100 text-purple-700',
-      [Status.DevReview]: 'bg-indigo-100 text-indigo-700',
-      [Status.Testing]: 'bg-orange-100 text-orange-700',
-      [Status.Completed]: 'bg-green-100 text-green-700',
-      [Status.OnHold]: 'bg-red-50 text-red-700',
+      [Status.NotStarted]: 'bg-gray-100 text-gray-700 border-gray-200',
+      [Status.InProgress]: 'bg-blue-100 text-blue-700 border-blue-200',
+      [Status.PMReview]: 'bg-purple-100 text-purple-700 border-purple-200',
+      [Status.DevReview]: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+      [Status.Testing]: 'bg-orange-100 text-orange-700 border-orange-200',
+      [Status.Completed]: 'bg-green-100 text-green-700 border-green-200',
+      [Status.OnHold]: 'bg-red-50 text-red-700 border-red-200',
     };
-    return <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${colors[status]}`}>{status}</span>;
+    return <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${colors[status]}`}>{status}</span>;
 };
   
 const PriorityBadge = ({ priority }: { priority: Priority }) => {
     const colors = {
-        [Priority.P1]: 'bg-red-100 text-red-700',    // P1 Red
-        [Priority.P2]: 'bg-yellow-100 text-yellow-800', // P2 Yellow
-        [Priority.P3]: 'bg-green-100 text-green-700', // P3 Green
-        [Priority.P4]: 'bg-blue-100 text-blue-700',   // P4 Blue
+        [Priority.P1]: 'bg-red-100 text-red-700 border-red-200',    // P1 Red
+        [Priority.P2]: 'bg-yellow-100 text-yellow-800 border-yellow-200', // P2 Yellow
+        [Priority.P3]: 'bg-green-100 text-green-700 border-green-200', // P3 Green
+        [Priority.P4]: 'bg-blue-100 text-blue-700 border-blue-200',   // P4 Blue
     };
-    return <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${colors[priority]}`}>{priority}</span>;
+    return <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${colors[priority]}`}>{priority}</span>;
 };
 
 const TypeBadge = ({ type }: { type: TicketType }) => {
     const colors = {
-        [TicketType.FeatureRequest]: 'text-emerald-700 bg-emerald-100',
-        [TicketType.Issue]: 'text-rose-700 bg-rose-100',
-        [TicketType.Question]: 'text-blue-700 bg-blue-100',
+        [TicketType.FeatureRequest]: 'text-emerald-700 bg-emerald-100 border-emerald-200',
+        [TicketType.Issue]: 'text-rose-700 bg-rose-100 border-rose-200',
+        [TicketType.Question]: 'text-blue-700 bg-blue-100 border-blue-200',
     };
-    return <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${colors[type]}`}>{type}</span>;
+    return <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${colors[type]}`}>{type}</span>;
 };
 
-// Helpers for View Mode Coloring
-const getProductAreaBadge = (area: ProductArea) => {
-    let colorClass = 'bg-slate-200 text-slate-700';
-    if (area === ProductArea.Fullpath) colorClass = 'bg-orange-100 text-orange-800'; // Orange
-    if (area === ProductArea.Reynolds) colorClass = 'bg-blue-900 text-white';        // Navy Blue
-    
-    return <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${colorClass}`}>{area}</span>;
-};
-
-const getPlatformBadge = (platform: Platform) => {
-    let colorClass = 'bg-slate-200 text-slate-700';
-    if (platform === Platform.FOCUS) colorClass = 'bg-orange-100 text-orange-800';   // Orange
-    if (platform === Platform.UCP) colorClass = 'bg-blue-100 text-blue-800';         // Blue
-    if (platform === Platform.Curator) colorClass = 'bg-purple-100 text-purple-800'; // Purple
-    
-    return <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${colorClass}`}>{platform}</span>;
-};
+const SimpleBadge = ({ label, colorClass }: { label: string, colorClass: string }) => (
+    <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${colorClass}`}>{label}</span>
+);
 
 export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDelete, isNew = false, dealerships }: TicketDrawerProps) {
   const [formData, setFormData] = useState<Ticket | null>(null);
@@ -155,8 +142,6 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
         const today = getTodayDateString();
         const updated = { ...formData, lastUpdatedDate: today };
         onUpdate(updated);
-        // If it's new, onUpdate will handle adding it to the list and setting ID
-        // We just need to update local state if we stay open
         setFormData(updated);
         setIsEditing(false);
     }
@@ -170,23 +155,19 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
   }
 
   // --- Update Logic ---
-
   const handleAddUpdate = () => {
     if (!newUpdateText.trim() || !formData) return;
-    
     const newUpdate: Update = {
       id: Date.now().toString(),
       author: newUpdateAuthor,
       date: newUpdateDate,
       comment: newUpdateText
     };
-
     const updatedTicket = {
       ...formData,
       updates: [newUpdate, ...formData.updates],
       lastUpdatedDate: getTodayDateString()
     };
-
     setFormData(updatedTicket);
     onUpdate(updatedTicket);
     setNewUpdateText('');
@@ -208,7 +189,6 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
       if (!tempUpdate || !formData) return;
       const updatedUpdates = formData.updates.map(u => u.id === tempUpdate.id ? tempUpdate : u);
       const updatedTicket = { ...formData, updates: updatedUpdates, lastUpdatedDate: getTodayDateString() };
-      
       setFormData(updatedTicket);
       onUpdate(updatedTicket);
       setEditingUpdateId(null);
@@ -220,12 +200,10 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
       if (!formData || !window.confirm("Delete this comment?")) return;
       const updatedUpdates = formData.updates.filter(u => u.id !== id);
       const updatedTicket = { ...formData, updates: updatedUpdates, lastUpdatedDate: getTodayDateString() };
-      
       setFormData(updatedTicket);
       onUpdate(updatedTicket);
       addToast('Comment deleted', 'success');
   };
-
 
   const renderField = (label: string, content: React.ReactNode) => (
       <div className="mb-1">
@@ -235,46 +213,6 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
           </div>
       </div>
   );
-
-  const renderLinkInput = (valKey: keyof Ticket, linkKey: keyof Ticket, label: string) => (
-    <div className="space-y-1">
-        <FieldLabel>{label} #</FieldLabel>
-        <Input type="number" value={formData && formData[valKey]} onChange={(e: any) => handleChange(valKey, parseInt(e.target.value) || undefined)} placeholder="#" />
-        <Input value={formData && formData[linkKey]} onChange={(e: any) => handleChange(linkKey, e.target.value)} placeholder={`${label} URL`} className="text-xs" />
-    </div>
-  );
-
-  const renderLinkDisplay = (valKey: keyof Ticket, linkKey: keyof Ticket, label: string) => {
-      if (!formData) return null;
-      const rawVal = formData[valKey];
-      // Ensure val is string or number for rendering
-      const val = (typeof rawVal === 'string' || typeof rawVal === 'number') ? rawVal : null;
-
-      const rawLink = formData[linkKey];
-      const link = (typeof rawLink === 'string') ? rawLink : undefined;
-      
-      // If absolutely nothing
-      if (!val && !link) return renderField(`${label} Number`, null);
-      
-      return (
-        <div className="mb-1">
-             <FieldLabel>{label} Number</FieldLabel>
-             <div className="min-h-[24px] flex items-center text-sm font-normal text-slate-800">
-                 {val && link ? (
-                     <a href={link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline hover:text-blue-800 font-semibold transition-colors">
-                         {val}
-                     </a>
-                 ) : val ? (
-                     <span>{val}</span>
-                 ) : (
-                     <a href={link} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-xs flex items-center gap-1">
-                        <LinkIcon size={12}/> Link
-                     </a>
-                 )}
-             </div>
-        </div>
-      );
-  }
 
   return (
     <>
@@ -289,299 +227,322 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
         
         {formData ? (
             <>
-                {/* Header Section */}
-                <div className="px-8 py-6 border-b border-slate-200 bg-white flex flex-col gap-4">
-                    {/* Row 1: Buttons Row (Right Aligned) */}
-                    <div className="flex items-center justify-end gap-2">
-                        {!isNew && (
-                            <>
-                                <button className="flex items-center gap-2 px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-xs font-medium rounded shadow-sm transition-colors" onClick={() => addToast("Copied info to clipboard", "success")}>
-                                    <Copy size={14} /> Copy Info
+                {/* 1. Sticky Header */}
+                <div className="flex-none bg-white border-b border-slate-200 px-6 py-4 z-10">
+                    <div className="flex flex-col gap-4">
+                        {/* Action Buttons (Right Aligned) */}
+                        <div className="flex items-center justify-end gap-2">
+                            {!isNew && (
+                                <>
+                                    <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium rounded shadow-sm transition-colors" onClick={() => addToast("Link copied to clipboard", "success")}>
+                                        <Copy size={12} /> Copy Link
+                                    </button>
+                                    <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-red-50 hover:border-red-200 hover:text-red-600 text-slate-700 text-xs font-medium rounded shadow-sm transition-colors" onClick={handleDelete}>
+                                        <Trash2 size={12} /> Delete
+                                    </button>
+                                </>
+                            )}
+                            
+                            {isEditing ? (
+                                <button 
+                                    onClick={handleSave}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded shadow-sm transition-colors"
+                                >
+                                    <Save size={12} /> Save
                                 </button>
-                                <button className="flex items-center gap-2 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded shadow-sm transition-colors" onClick={handleDelete}>
-                                    <Trash2 size={14} /> Delete
+                            ) : (
+                                <button 
+                                    onClick={() => setIsEditing(true)}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium rounded shadow-sm transition-colors"
+                                >
+                                    <Edit2 size={12} /> Edit
                                 </button>
-                            </>
-                        )}
-                        
-                        {isEditing ? (
-                            <button 
-                                onClick={handleSave}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded shadow-sm transition-colors"
-                            >
-                                <Save size={14} /> Save
-                            </button>
-                        ) : (
-                            <button 
-                                onClick={() => setIsEditing(true)}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded shadow-sm transition-colors"
-                            >
-                                <Edit2 size={14} /> Edit
-                            </button>
-                        )}
+                            )}
 
-                        <button onClick={onClose} className="ml-2 p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600">
-                            <X size={20} />
+                            <div className="w-px h-6 bg-slate-200 mx-1"></div>
+
+                            <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-md text-slate-400 hover:text-slate-600 transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Ticket Name */}
+                        <div>
+                            {isEditing ? (
+                                <Input 
+                                    value={formData.title} 
+                                    onChange={(e: any) => handleChange('title', e.target.value)} 
+                                    placeholder="Enter Ticket Title" 
+                                    className="text-xl font-bold px-0 border-transparent hover:border-slate-300 focus:border-primary focus:ring-0 bg-transparent placeholder:text-slate-300" 
+                                />
+                            ) : (
+                                <h2 className="text-2xl font-bold text-slate-900 leading-snug">{formData.title}</h2>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Content Area */}
+                <div className="flex-1 overflow-y-auto bg-white custom-scrollbar" ref={scrollRef}>
+                    
+                    {/* 2. Status Row (Band) */}
+                    <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
+                        {isEditing ? (
+                            <div className="grid grid-cols-3 gap-4">
+                                <div><FieldLabel>Status</FieldLabel><Select value={formData.status} options={Object.values(Status)} onChange={(e: any) => handleChange('status', e.target.value)} /></div>
+                                <div><FieldLabel>Priority</FieldLabel><Select value={formData.priority} options={Object.values(Priority)} onChange={(e: any) => handleChange('priority', e.target.value)} /></div>
+                                <div><FieldLabel>Type</FieldLabel><Select value={formData.type} options={Object.values(TicketType)} onChange={(e: any) => handleChange('type', e.target.value)} /></div>
+                                <div><FieldLabel>Product Area</FieldLabel><Select value={formData.productArea} options={Object.values(ProductArea)} onChange={(e: any) => handleChange('productArea', e.target.value)} /></div>
+                                <div><FieldLabel>Platform</FieldLabel><Select value={formData.platform} options={Object.values(Platform)} onChange={(e: any) => handleChange('platform', e.target.value)} /></div>
+                                <div><FieldLabel>Location</FieldLabel><Input value={formData.location} onChange={(e: any) => handleChange('location', e.target.value)} /></div>
+                            </div>
+                        ) : (
+                             <div className="flex flex-wrap items-center gap-3">
+                                <StatusBadge status={formData.status} />
+                                <PriorityBadge priority={formData.priority} />
+                                <TypeBadge type={formData.type} />
+                                <div className="w-px h-5 bg-slate-300 mx-1"></div>
+                                <SimpleBadge 
+                                    label={formData.productArea} 
+                                    colorClass={formData.productArea === ProductArea.Fullpath ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-blue-50 text-blue-700 border-blue-200'} 
+                                />
+                                <SimpleBadge 
+                                    label={formData.platform} 
+                                    colorClass="bg-slate-100 text-slate-600 border-slate-200" 
+                                />
+                                {formData.location && (
+                                    <span className="text-xs font-medium text-slate-500 flex items-center gap-1">
+                                        in <span className="font-semibold text-slate-700">{formData.location}</span>
+                                    </span>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="p-6 space-y-8">
+                        {/* 3. Dates Section */}
+                        <div>
+                             <SectionHeader>Dates</SectionHeader>
+                             <div className="grid grid-cols-3 gap-8">
+                                {isEditing ? (
+                                    <>
+                                        <div>
+                                            <FieldLabel>Start Date</FieldLabel>
+                                            <Input type="date" value={toInputDate(formData.startDate)} onChange={(e: any) => handleChange('startDate', fromInputDate(e.target.value))} />
+                                        </div>
+                                        <div>
+                                            <FieldLabel>Last Updated</FieldLabel>
+                                            <div className="text-sm text-slate-500 py-1.5">{formData.lastUpdatedDate}</div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        {renderField('Start Date', <span className="flex items-center gap-2"><Calendar size={14} className="text-slate-400"/> {formData.startDate}</span>)}
+                                        {renderField('Last Updated', <span className="flex items-center gap-2"><Clock size={14} className="text-slate-400"/> {formData.lastUpdatedDate}</span>)}
+                                        {renderField('Days Active', <span className="font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">{getDaysActive(formData.startDate)} Days</span>)}
+                                    </>
+                                )}
+                             </div>
+                        </div>
+
+                        {/* 4. Tracking & Ownership */}
+                        <div>
+                            <SectionHeader>Tracking & Ownership</SectionHeader>
+                            <div className="grid grid-cols-2 gap-x-12 gap-y-6">
+                                {/* Submitter & Client */}
+                                <div>
+                                    {isEditing ? (
+                                        <div><FieldLabel>Submitter</FieldLabel><Input value={formData.submitterName} onChange={(e: any) => handleChange('submitterName', e.target.value)} /></div>
+                                    ) : renderField('Submitter', <span className="flex items-center gap-2"><User size={14} className="text-slate-400"/> {formData.submitterName}</span>)}
+                                </div>
+                                <div>
+                                    {isEditing ? (
+                                        <div><FieldLabel>Client</FieldLabel><Select value={formData.client} options={clientOptions} onChange={(e: any) => handleChange('client', e.target.value)} /></div>
+                                    ) : renderField('Client', formData.client)}
+                                </div>
+
+                                {/* PMR */}
+                                <div>
+                                    {isEditing ? (
+                                         <div><FieldLabel>PMR #</FieldLabel><Input type="number" value={formData.pmrNumber} onChange={(e: any) => handleChange('pmrNumber', parseInt(e.target.value) || undefined)} placeholder="#" /></div>
+                                    ) : renderField('PMR #', formData.pmrNumber)}
+                                </div>
+                                <div>
+                                    {isEditing ? (
+                                         <div><FieldLabel>PMR URL</FieldLabel><Input value={formData.pmrLink} onChange={(e: any) => handleChange('pmrLink', e.target.value)} placeholder="https://" /></div>
+                                    ) : (
+                                        formData.pmrLink ? (
+                                            renderField('PMR URL', <a href={formData.pmrLink} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline flex items-center gap-1 truncate max-w-xs">{formData.pmrLink} <Globe size={12}/></a>)
+                                        ) : renderField('PMR URL', null)
+                                    )}
+                                </div>
+
+                                {/* PMG */}
+                                <div>
+                                    {isEditing ? (
+                                         <div><FieldLabel>PMG #</FieldLabel><Input type="number" value={formData.pmgNumber} onChange={(e: any) => handleChange('pmgNumber', parseInt(e.target.value) || undefined)} placeholder="#" /></div>
+                                    ) : renderField('PMG #', formData.pmgNumber)}
+                                </div>
+                                <div>
+                                    {isEditing ? (
+                                         <div><FieldLabel>PMG URL</FieldLabel><Input value={formData.pmgLink} onChange={(e: any) => handleChange('pmgLink', e.target.value)} placeholder="https://" /></div>
+                                    ) : (
+                                        formData.pmgLink ? (
+                                            renderField('PMG URL', <a href={formData.pmgLink} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline flex items-center gap-1 truncate max-w-xs">{formData.pmgLink} <Globe size={12}/></a>)
+                                        ) : renderField('PMG URL', null)
+                                    )}
+                                </div>
+
+                                {/* CPM */}
+                                <div>
+                                    {isEditing ? (
+                                         <div><FieldLabel>CPM #</FieldLabel><Input type="number" value={formData.cpmNumber} onChange={(e: any) => handleChange('cpmNumber', parseInt(e.target.value) || undefined)} placeholder="#" /></div>
+                                    ) : renderField('CPM #', formData.cpmNumber)}
+                                </div>
+                                <div>
+                                    {isEditing ? (
+                                         <div><FieldLabel>CPM URL</FieldLabel><Input value={formData.cpmLink} onChange={(e: any) => handleChange('cpmLink', e.target.value)} placeholder="https://" /></div>
+                                    ) : (
+                                        formData.cpmLink ? (
+                                            renderField('CPM URL', <a href={formData.cpmLink} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline flex items-center gap-1 truncate max-w-xs">{formData.cpmLink} <Globe size={12}/></a>)
+                                        ) : renderField('CPM URL', null)
+                                    )}
+                                </div>
+
+                                {/* FP Ticket */}
+                                <div>
+                                    {isEditing ? (
+                                         <div><FieldLabel>FP Ticket Number</FieldLabel><Input type="number" value={formData.fpTicketNumber} onChange={(e: any) => handleChange('fpTicketNumber', parseInt(e.target.value) || undefined)} placeholder="#" /></div>
+                                    ) : renderField('FP Ticket Number', formData.fpTicketNumber)}
+                                </div>
+                                <div>
+                                    {/* Empty Column for grid alignment as requested, or can put something else here if needed */}
+                                </div>
+
+                                {/* Thread ID - Full Width */}
+                                <div className="col-span-2">
+                                     {isEditing ? (
+                                         <div><FieldLabel>Ticket Thread ID</FieldLabel><Input value={formData.ticketThreadId} onChange={(e: any) => handleChange('ticketThreadId', e.target.value)} /></div>
+                                    ) : renderField('Ticket Thread ID', <span className="font-mono text-xs text-slate-500">{formData.ticketThreadId}</span>)}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 5. Issue Summary */}
+                        <div>
+                            <SectionHeader>Issue Summary</SectionHeader>
+                            {isEditing ? (
+                                <Input value={formData.summary} onChange={(e: any) => handleChange('summary', e.target.value)} placeholder="Brief summary..." />
+                            ) : (
+                                <p className="text-lg text-slate-800 font-medium leading-relaxed">{formData.summary || <span className="text-slate-400 italic text-sm">No summary provided.</span>}</p>
+                            )}
+                        </div>
+
+                        {/* 6. Details */}
+                        <div>
+                            <SectionHeader>Details</SectionHeader>
+                            {isEditing ? (
+                                <TextArea value={formData.details} onChange={(e: any) => handleChange('details', e.target.value)} className="h-48" placeholder="Full details..." />
+                            ) : (
+                                <div className="bg-slate-50 rounded-md border border-slate-200 p-4 min-h-[200px] max-h-[300px] overflow-y-auto custom-scrollbar">
+                                    <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+                                        {formData.details || <span className="text-slate-400 italic">No details provided.</span>}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* 7. Activity */}
+                        <div className="pt-4 border-t border-slate-100">
+                             <SectionHeader>Activity</SectionHeader>
+                             <div className="space-y-6">
+                                {formData.updates.length === 0 ? (
+                                    <p className="text-slate-400 italic text-sm">No activity recorded yet.</p>
+                                ) : (
+                                    <div className="space-y-6 pl-4 border-l-2 border-slate-100 ml-2">
+                                        {[...formData.updates].reverse().map((update) => (
+                                            <div key={update.id} className="relative group">
+                                                <div className="absolute -left-[21px] top-0 w-3 h-3 rounded-full bg-slate-300 border-2 border-white ring-1 ring-slate-100"></div>
+                                                <div className="flex justify-between items-baseline mb-1">
+                                                     <div className="flex items-center gap-2">
+                                                        <span className="font-bold text-sm text-slate-800">{update.author}</span>
+                                                        <span className="text-xs text-slate-400">{update.date}</span>
+                                                     </div>
+                                                     <div className="opacity-0 group-hover:opacity-100 flex gap-2 transition-opacity">
+                                                         <button onClick={() => startEditingUpdate(update)} className="text-xs text-blue-600 hover:underline">Edit</button>
+                                                         <button onClick={() => handleDeleteUpdate(update.id)} className="text-xs text-red-600 hover:underline">Delete</button>
+                                                     </div>
+                                                </div>
+                                                
+                                                {editingUpdateId === update.id && tempUpdate ? (
+                                                     <div className="mt-2 p-3 bg-slate-50 rounded border border-slate-200 space-y-2">
+                                                         <div className="grid grid-cols-2 gap-2">
+                                                            <Input value={tempUpdate.author} onChange={(e: any) => setTempUpdate({...tempUpdate, author: e.target.value})} placeholder="Author" />
+                                                            <Input type="date" value={toInputDate(tempUpdate.date)} onChange={(e: any) => setTempUpdate({...tempUpdate, date: fromInputDate(e.target.value)})} />
+                                                         </div>
+                                                         <TextArea value={tempUpdate.comment} onChange={(e: any) => setTempUpdate({...tempUpdate, comment: e.target.value})} />
+                                                         <div className="flex justify-end gap-2">
+                                                             <button onClick={cancelEditingUpdate} className="text-xs text-slate-500">Cancel</button>
+                                                             <button onClick={saveEditingUpdate} className="text-xs bg-blue-600 text-white px-2 py-1 rounded">Save</button>
+                                                         </div>
+                                                     </div>
+                                                ) : (
+                                                    <p className="text-sm text-slate-600 whitespace-pre-wrap">{update.comment}</p>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Add Comment Box */}
+                                <div className="mt-8 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                    <h4 className="text-xs font-bold text-slate-500 uppercase mb-3">Add Comment</h4>
+                                    <div className="grid grid-cols-2 gap-4 mb-3">
+                                        <Input value={newUpdateAuthor} onChange={(e: any) => setNewUpdateAuthor(e.target.value)} placeholder="Your Name" />
+                                        <Input type="date" value={toInputDate(newUpdateDate)} onChange={(e: any) => setNewUpdateDate(fromInputDate(e.target.value))} />
+                                    </div>
+                                    <TextArea 
+                                        value={newUpdateText} 
+                                        onChange={(e: any) => setNewUpdateText(e.target.value)} 
+                                        placeholder="Type your comment or update here..." 
+                                        rows={3}
+                                    />
+                                    <div className="flex justify-end mt-3">
+                                        <button 
+                                            onClick={handleAddUpdate}
+                                            disabled={!newUpdateText.trim()}
+                                            className="bg-primary hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-1.5 rounded text-sm font-medium transition-colors"
+                                        >
+                                            Post Comment
+                                        </button>
+                                    </div>
+                                </div>
+                             </div>
+                        </div>
+
+                        {/* Extra padding for bottom scroll */}
+                        <div className="h-10"></div>
+                    </div>
+                </div>
+
+                {/* Footer Action for New Ticket Only */}
+                {isNew && (
+                    <div className="flex-none p-4 border-t border-slate-200 bg-white">
+                         <button 
+                            onClick={handleSave}
+                            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded shadow-md transition-all"
+                        >
+                            <Plus size={18} /> Create Ticket
                         </button>
                     </div>
-
-                    {/* Row 2: Ticket Name Field */}
-                    <div>
-                        {!isEditing ? (
-                            <h2 className="text-2xl font-bold text-slate-900 leading-tight break-words">{formData.title}</h2>
-                        ) : (
-                            <div className="flex-1">
-                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Ticket Name</label>
-                                <Input value={formData.title} onChange={(e: any) => handleChange('title', e.target.value)} placeholder="Enter Ticket Title..." className="text-lg font-bold" />
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-slate-50/50" ref={scrollRef}>
-                
-                {/* 1. Core Information */}
-                <SectionHeader>Core Information</SectionHeader>
-                <div className="grid grid-cols-3 gap-x-8 gap-y-6">
-                    {/* Row 1: Type, Priority, Status */}
-                    {isEditing ? (
-                        <>
-                            <div><FieldLabel>Type</FieldLabel><Select value={formData.type} options={Object.values(TicketType)} onChange={(e: any) => handleChange('type', e.target.value)} /></div>
-                            <div><FieldLabel>Priority</FieldLabel><Select value={formData.priority} options={Object.values(Priority)} onChange={(e: any) => handleChange('priority', e.target.value)} /></div>
-                            <div><FieldLabel>Status</FieldLabel><Select value={formData.status} options={Object.values(Status)} onChange={(e: any) => handleChange('status', e.target.value)} /></div>
-                        </>
-                    ) : (
-                        <>
-                            {renderField('Type', <TypeBadge type={formData.type} />)}
-                            {renderField('Priority', <PriorityBadge priority={formData.priority} />)}
-                            {renderField('Status', <StatusBadge status={formData.status} />)}
-                        </>
-                    )}
-
-                    {/* Row 2: Status Reason */}
-                    <div className="col-span-3">
-                        {isEditing ? (
-                            <div><FieldLabel>Status Reason</FieldLabel><Input value={formData.reason} onChange={(e: any) => handleChange('reason', e.target.value)} placeholder="Reason..." /></div>
-                        ) : (
-                            renderField('Status Reason', <span className="text-slate-600">{formData.reason}</span>)
-                        )}
-                    </div>
-
-                    {/* Row 3: Product Area, Platform, Location */}
-                    {isEditing ? (
-                        <>
-                            <div><FieldLabel>Product Area</FieldLabel><Select value={formData.productArea} options={Object.values(ProductArea)} onChange={(e: any) => handleChange('productArea', e.target.value)} /></div>
-                            <div><FieldLabel>Platform</FieldLabel><Select value={formData.platform} options={Object.values(Platform)} onChange={(e: any) => handleChange('platform', e.target.value)} /></div>
-                            <div><FieldLabel>Location</FieldLabel><Input value={formData.location} onChange={(e: any) => handleChange('location', e.target.value)} /></div>
-                        </>
-                    ) : (
-                        <>
-                            {renderField('Product Area', getProductAreaBadge(formData.productArea))}
-                            {renderField('Platform', getPlatformBadge(formData.platform))}
-                            {renderField('Location', formData.location)}
-                        </>
-                    )}
-                </div>
-
-                {/* 2. Dates */}
-                <SectionHeader>Dates</SectionHeader>
-                <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-                    {isEditing ? (
-                        <>
-                            <div>
-                                <FieldLabel>Start Date</FieldLabel>
-                                <div className="relative">
-                                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14}/>
-                                    <Input type="date" className="pl-9" value={toInputDate(formData.startDate)} onChange={(e: any) => handleChange('startDate', fromInputDate(e.target.value))} />
-                                </div>
-                            </div>
-                            <div>
-                                <FieldLabel>Last Updated</FieldLabel>
-                                <div className="px-3 py-1.5 bg-slate-100 text-slate-500 rounded text-sm border border-slate-200">{formData.lastUpdatedDate}</div>
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            {renderField('Start Date', formData.startDate)}
-                            {renderField('Last Updated', formData.lastUpdatedDate)}
-                        </>
-                    )}
-                </div>
-
-                {/* 3. Tracking & Ownership */}
-                <SectionHeader>Tracking & Ownership</SectionHeader>
-                <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-                    {/* Row 1 */}
-                    {isEditing ? (
-                        <>
-                            <div><FieldLabel>Submitter</FieldLabel><Input value={formData.submitterName} onChange={(e: any) => handleChange('submitterName', e.target.value)} /></div>
-                            <div><FieldLabel>Client</FieldLabel><Select value={formData.client} options={clientOptions} onChange={(e: any) => handleChange('client', e.target.value)} /></div>
-                        </>
-                    ) : (
-                        <>
-                            {renderField('Submitter', formData.submitterName)}
-                            {renderField('Client', formData.client)}
-                        </>
-                    )}
-
-                    {/* Row 2: PMR */}
-                    {isEditing ? renderLinkInput('pmrNumber', 'pmrLink', 'PMR') : renderLinkDisplay('pmrNumber', 'pmrLink', 'PMR')}
-                    
-                    {/* Row 3: PMG */}
-                    {isEditing ? renderLinkInput('pmgNumber', 'pmgLink', 'PMG') : renderLinkDisplay('pmgNumber', 'pmgLink', 'PMG')}
-                    {isEditing ? renderLinkInput('cpmNumber', 'cpmLink', 'CPM') : renderLinkDisplay('cpmNumber', 'cpmLink', 'CPM')}
-                    
-                    {/* FP Ticket & Thread */}
-                    {isEditing ? (
-                        <>
-                            <div><FieldLabel>FP Ticket Number</FieldLabel><Input type="number" value={formData.fpTicketNumber} onChange={(e: any) => handleChange('fpTicketNumber', parseInt(e.target.value) || undefined)} /></div>
-                            <div><FieldLabel>Ticket Thread ID</FieldLabel><Input value={formData.ticketThreadId} onChange={(e: any) => handleChange('ticketThreadId', e.target.value)} /></div>
-                        </>
-                    ) : (
-                        <>
-                            {renderField('FP Ticket Number', formData.fpTicketNumber ? `#${formData.fpTicketNumber}` : null)}
-                            {renderField('Ticket Thread ID', formData.ticketThreadId)}
-                        </>
-                    )}
-                </div>
-
-                {/* 4. Issue Information */}
-                <SectionHeader>Issue Information</SectionHeader>
-                <div className="space-y-6">
-                    <div>
-                        <FieldLabel>Summary</FieldLabel>
-                        {isEditing ? (
-                            <Input value={formData.summary} onChange={(e: any) => handleChange('summary', e.target.value)} placeholder="Short summary of the issue..." />
-                        ) : (
-                            <div className="text-sm text-slate-800 font-normal">{formData.summary || "No summary provided."}</div>
-                        )}
-                    </div>
-                    <div>
-                        <FieldLabel>Details</FieldLabel>
-                        {isEditing ? (
-                            <TextArea value={formData.details} onChange={(e: any) => handleChange('details', e.target.value)} className="h-32" />
-                        ) : (
-                            <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{formData.details || "No details provided."}</p>
-                        )}
-                    </div>
-                </div>
-
-                {/* 5. Ticket Activity */}
-                <SectionHeader>Ticket Activity ({formData.updates.length})</SectionHeader>
-                
-                <div className="space-y-6">
-                    {formData.updates.length === 0 ? (
-                        <p className="text-slate-400 italic text-sm">No activity recorded yet.</p>
-                    ) : (
-                        <div className="space-y-4">
-                            {formData.updates.map((update) => (
-                                <div key={update.id} className="flex gap-3 group">
-                                    <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 text-xs font-bold shrink-0 uppercase">
-                                        {update.author.charAt(0)}
-                                    </div>
-                                    <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex-1 relative">
-                                        {editingUpdateId === update.id && tempUpdate ? (
-                                            // Edit Mode for Comment
-                                            <div className="space-y-3">
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    <div><FieldLabel>Name</FieldLabel><Input value={tempUpdate.author} onChange={(e: any) => setTempUpdate({...tempUpdate, author: e.target.value})} /></div>
-                                                    <div>
-                                                        <FieldLabel>Date</FieldLabel>
-                                                        <Input type="date" value={toInputDate(tempUpdate.date)} onChange={(e: any) => setTempUpdate({...tempUpdate, date: fromInputDate(e.target.value)})} />
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <FieldLabel>Comment</FieldLabel>
-                                                    <TextArea value={tempUpdate.comment} onChange={(e: any) => setTempUpdate({...tempUpdate, comment: e.target.value})} />
-                                                </div>
-                                                <div className="flex gap-2 justify-end">
-                                                    <button onClick={cancelEditingUpdate} className="text-xs text-slate-500 hover:underline">Cancel</button>
-                                                    <button onClick={saveEditingUpdate} className="flex items-center gap-1 text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"><Save size={12}/> Save Update</button>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            // View Mode for Comment
-                                            <>
-                                                <div className="flex justify-between items-center mb-1">
-                                                    <span className="font-bold text-xs text-slate-700">{update.author}</span>
-                                                    <span className="text-[10px] text-slate-400">{update.date}</span>
-                                                </div>
-                                                <p className="text-sm text-slate-600 whitespace-pre-wrap">{update.comment}</p>
-                                                
-                                                {/* Action Buttons (Hidden until hover) */}
-                                                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button onClick={() => startEditingUpdate(update)} className="p-1 text-slate-400 hover:text-blue-500"><Edit2 size={12}/></button>
-                                                    <button onClick={() => handleDeleteUpdate(update.id)} className="p-1 text-slate-400 hover:text-red-500"><Trash2 size={12}/></button>
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Add Comment Box with Name/Date Fields */}
-                    <div className="mt-6 p-4 bg-white rounded-lg border border-slate-200 shadow-sm">
-                        <div className="grid grid-cols-2 gap-3 mb-3">
-                            <div>
-                                <label className="text-[10px] font-bold text-slate-400 uppercase">Your Name</label>
-                                <input 
-                                    className="w-full text-sm border-b border-slate-200 focus:border-primary focus:outline-none py-1" 
-                                    value={newUpdateAuthor} 
-                                    onChange={(e) => setNewUpdateAuthor(e.target.value)}
-                                />
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-bold text-slate-400 uppercase">Date</label>
-                                <input 
-                                    type="date"
-                                    className="w-full text-sm border-b border-slate-200 focus:border-primary focus:outline-none py-1 text-slate-600" 
-                                    value={toInputDate(newUpdateDate)} 
-                                    onChange={(e) => setNewUpdateDate(fromInputDate(e.target.value))}
-                                />
-                            </div>
-                        </div>
-                        <textarea 
-                            className="w-full text-sm border-none focus:ring-0 p-0 mb-3 resize-y placeholder:text-slate-400"
-                            placeholder="Write a comment or update..."
-                            rows={6}
-                            value={newUpdateText}
-                            onChange={(e) => setNewUpdateText(e.target.value)}
-                        />
-                        <div className="flex justify-between items-center border-t border-slate-100 pt-3">
-                            <div className="flex gap-2">
-                                {/* Mock attachments buttons */}
-                            </div>
-                            <button 
-                                onClick={handleAddUpdate}
-                                disabled={!newUpdateText.trim()}
-                                className="bg-primary hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-4 py-1.5 rounded text-sm font-medium transition-colors"
-                            >
-                                Comment
-                            </button>
-                        </div>
-                    </div>
-
-                    {isNew && (
-                        <div className="mt-8 flex justify-end border-t border-slate-100 pt-6">
-                            <button 
-                                onClick={handleSave}
-                                className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded shadow-md transition-all hover:shadow-lg w-full justify-center sm:w-auto"
-                            >
-                                <Plus size={18} /> Add Ticket
-                            </button>
-                        </div>
-                    )}
-                </div>
-
-                <div className="h-20"></div>
-                </div>
+                )}
             </>
         ) : (
             <div className="p-10 flex items-center justify-center h-full">
-                {/* Loading skeleton or blank state when closed/animating out */}
+                <div className="animate-pulse flex flex-col items-center">
+                    <div className="h-4 w-32 bg-slate-200 rounded mb-4"></div>
+                    <div className="h-64 w-64 bg-slate-100 rounded"></div>
+                </div>
             </div>
         )}
       </div>
