@@ -158,6 +158,53 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
       }
   }
 
+  // --- Copy CSV Logic ---
+  const handleCopyCSV = () => {
+    if (!formData) return;
+
+    const escapeCsvField = (field: any) => {
+        if (field === null || field === undefined) return '';
+        const stringValue = String(field);
+        if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+            return `"${stringValue.replace(/"/g, '""')}"`;
+        }
+        return stringValue;
+    };
+
+    let recentActivity = '';
+    // Assuming updates are stored with newest first (index 0)
+    if (formData.updates && formData.updates.length > 0) {
+        const latest = formData.updates[0];
+        recentActivity = `${latest.date}: [${latest.author}] ${latest.comment}`;
+    }
+
+    const fields = [
+        formData.startDate,
+        formData.lastUpdatedDate,
+        formData.title,
+        formData.priority,
+        formData.productArea,
+        formData.platform,
+        formData.location,
+        formData.status,
+        formData.reason,
+        formData.submitterName,
+        formData.client,
+        formData.pmrNumber,
+        formData.pmgNumber,
+        formData.cpmNumber,
+        formData.fpTicketNumber,
+        formData.ticketThreadId,
+        formData.summary,
+        recentActivity
+    ];
+
+    const csvLine = fields.map(escapeCsvField).join(',');
+    
+    navigator.clipboard.writeText(csvLine);
+    addToast("CSV line copied to clipboard", "success");
+  };
+
   // --- Update Logic ---
   const handleAddUpdate = () => {
     if (!newUpdateText.trim() || !formData) return;
@@ -238,8 +285,8 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
                         <div className="flex items-center justify-end gap-2">
                             {!isNew && (
                                 <>
-                                    <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium rounded shadow-sm transition-colors" onClick={() => addToast("Link copied to clipboard", "success")}>
-                                        <Copy size={12} /> Copy Link
+                                    <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium rounded shadow-sm transition-colors" onClick={handleCopyCSV}>
+                                        <Copy size={12} /> Copy CSV
                                     </button>
                                     <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-red-50 hover:border-red-200 hover:text-red-600 text-slate-700 text-xs font-medium rounded shadow-sm transition-colors" onClick={handleDelete}>
                                         <Trash2 size={12} /> Delete
@@ -571,4 +618,3 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
     </>
   );
 }
-  
