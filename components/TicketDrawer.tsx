@@ -191,6 +191,7 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
         formData.location,
         formData.status,
         formData.reason,
+        formData.release,
         formData.submitterName,
         formData.client,
         formData.pmrNumber,
@@ -491,6 +492,13 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
                                      {isEditing ? (
                                          <div><FieldLabel>Ticket Thread ID</FieldLabel><Input value={formData.ticketThreadId} onChange={(e: any) => handleChange('ticketThreadId', e.target.value)} /></div>
                                     ) : renderField('Ticket Thread ID', <span className="font-mono text-sm text-slate-500">{formData.ticketThreadId}</span>)}
+                                </div>
+
+                                {/* Release - Full Width */}
+                                <div className="col-span-2">
+                                    {isEditing ? (
+                                        <div><FieldLabel>Release</FieldLabel><Input value={formData.release} onChange={(e: any) => handleChange('release', e.target.value)} placeholder="e.g. v2.4.1" /></div>
+                                    ) : renderField('Release', <span className="font-mono text-sm text-slate-500">{formData.release}</span>)}
                                 </div>
                             </div>
                         </div>

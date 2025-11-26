@@ -66,6 +66,7 @@ export const exportTicketsToCSV = (tickets: Ticket[]) => {
     'CPM #',
     'FP Ticket Number',
     'Ticket Thread ID',
+    'Release',
     'Summary',
     'Details'
   ];
@@ -89,6 +90,7 @@ export const exportTicketsToCSV = (tickets: Ticket[]) => {
     t.cpmNumber || '',
     t.fpTicketNumber || '',
     t.ticketThreadId || '',
+    t.release || '',
     t.summary || '',
     t.details || ''
   ]);

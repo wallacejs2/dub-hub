@@ -41,6 +41,8 @@ export const createEmptyTicket = (): Ticket => ({
   reason: '',
   submitterName: '',
   client: mockClients[0],
+  ticketThreadId: '',
+  release: '',
   summary: '',
   details: '',
   updates: [],
@@ -64,6 +66,7 @@ export const generateMockTickets = (): Ticket[] => {
       reason: 'High user demand',
       submitterName: 'John Doe',
       client: 'Acme Corp',
+      release: 'v2.5',
       summary: 'Implement a system-wide dark mode toggle.',
       details: 'Users want a dark mode toggle in the header. This involves updating CSS variables and persisting state in local storage.',
       updates: [
@@ -124,6 +127,7 @@ export const generateMockTickets = (): Ticket[] => {
       reason: 'Bug fix',
       submitterName: 'Bob Williams',
       client: 'Global Motors',
+      release: 'v2.4.1',
       summary: 'CSV Export fails with 500 error.',
       details: 'Clicking CSV export throws a 500 error. Logs indicate a null pointer exception in the CSV generator service.',
       updates: [

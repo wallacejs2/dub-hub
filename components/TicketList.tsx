@@ -411,13 +411,12 @@ export default function TicketList({
                                 />
                             </div>
                             
-                            {/* ORDER: Type, Priority, Status, Dealership, Product Area, Platform, Location */}
+                            {/* ORDER: Type, Priority, Dealership, Product Area, Platform, Location */}
+                            {/* Status and Release removed from here */}
                             
                             <TypeBadge type={ticket.type} />
                             
                             <PriorityBadge priority={ticket.priority} />
-                            
-                            <StatusBadge status={ticket.status} />
                             
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-50 text-slate-600 border border-slate-200 truncate max-w-[150px]">
                                     {ticket.client}
@@ -451,21 +450,29 @@ export default function TicketList({
 
                     {/* 2. Middle Content: Title & Summary */}
                     <div className="mb-3 pl-7"> 
-                        <h3 className={`text-base font-bold leading-tight truncate mb-1 
+                        <h3 className={`text-base font-bold leading-tight truncate mb-2
                             ${ticket.status === Status.Completed ? 'text-emerald-700' : 
                               ticket.status === Status.Cancelled ? 'text-red-700' : 'text-slate-900'}
                         `}>
                             {ticket.title}
                         </h3>
                         
-                        {/* Status Reason moved below title */}
-                        {ticket.reason && (
-                            <div className="mb-2">
+                        {/* Status Row: Release, Status, Status Reason */}
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                             {ticket.release && (
+                                <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded">
+                                    {ticket.release}
+                                </span>
+                            )}
+                            
+                            <StatusBadge status={ticket.status} />
+
+                            {ticket.reason && (
                                 <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium border ${getStatusColorClasses(ticket.status).bg} ${getStatusColorClasses(ticket.status).text} ${getStatusColorClasses(ticket.status).border}`}>
                                     {ticket.reason}
                                 </span>
-                            </div>
-                        )}
+                            )}
+                        </div>
 
                         {/* Summary */}
                         <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">

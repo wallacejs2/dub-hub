@@ -51,6 +51,7 @@ export interface Ticket {
   // External References
   fpTicketNumber?: number;
   ticketThreadId?: string; // Text
+  release?: string; // Text input
   pmrNumber?: number;
   pmrLink?: string; // URL
   pmgNumber?: number;
