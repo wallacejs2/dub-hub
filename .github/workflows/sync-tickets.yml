@@ -1,0 +1,34 @@
+name: Sync Tickets to Google Sheets
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "tickets.json"
+      - "sync_tickets_to_sheets.py"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Sync tickets.json -> Google Sheets
+        env:
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SHEET_TAB_NAME: "Tickets"
+        run: |
+          python sync_tickets_to_sheets.py
