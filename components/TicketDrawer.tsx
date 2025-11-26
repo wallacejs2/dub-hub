@@ -146,8 +146,21 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
             addToast("Please enter a ticket title", "error");
             return;
         }
-        const today = getTodayDateString();
-        const updated = { ...formData, lastUpdatedDate: today };
+
+        let finalLastUpdated = getTodayDateString();
+
+        // Check if Last Updated Date was manually modified by the user
+        // If the date in formData is different from the original ticket date (and we are not creating a new one from scratch where it's already today), preserve the manual change.
+        if (!isNew && ticket && formData.lastUpdatedDate !== ticket.lastUpdatedDate) {
+             finalLastUpdated = formData.lastUpdatedDate;
+        } 
+        // If it's new, we trust the formData (which defaults to today, but can be changed by user)
+        else if (isNew) {
+             finalLastUpdated = formData.lastUpdatedDate;
+        }
+        // Otherwise (User didn't touch the date, but modified other fields), auto-update to Today.
+
+        const updated = { ...formData, lastUpdatedDate: finalLastUpdated };
         onUpdate(updated);
         setFormData(updated);
         setIsEditing(false);
@@ -221,12 +234,14 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
     const updatedTicket = {
       ...formData,
       updates: [newUpdate, ...formData.updates],
-      lastUpdatedDate: getTodayDateString()
+      // Update lastUpdatedDate to match the date of the new comment
+      lastUpdatedDate: newUpdateDate 
     };
     setFormData(updatedTicket);
     onUpdate(updatedTicket);
     setNewUpdateText('');
     setNewUpdateAuthor('You'); 
+    setNewUpdateDate(getTodayDateString());
     addToast('Comment added', 'success');
   };
 
@@ -243,6 +258,7 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
   const saveEditingUpdate = () => {
       if (!tempUpdate || !formData) return;
       const updatedUpdates = formData.updates.map(u => u.id === tempUpdate.id ? tempUpdate : u);
+      // When editing a comment, we usually update the ticket's Last Updated date to Today to reflect the modification
       const updatedTicket = { ...formData, updates: updatedUpdates, lastUpdatedDate: getTodayDateString() };
       setFormData(updatedTicket);
       onUpdate(updatedTicket);
@@ -401,7 +417,7 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
                                         </div>
                                         <div>
                                             <FieldLabel>Last Updated</FieldLabel>
-                                            <div className="text-sm text-slate-500 py-1.5">{formData.lastUpdatedDate}</div>
+                                            <Input type="date" value={toInputDate(formData.lastUpdatedDate)} onChange={(e: any) => handleChange('lastUpdatedDate', fromInputDate(e.target.value))} />
                                         </div>
                                     </>
                                 ) : (
