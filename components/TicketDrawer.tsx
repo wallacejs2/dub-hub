@@ -65,7 +65,7 @@ const Select = ({ value, onChange, options }: any) => (
 
 // --- Badge Components for View Mode ---
 
-const StatusBadge = ({ status }: { status: Status }) => {
+const getStatusBadgeColors = (status: Status) => {
     const colors = {
       [Status.NotStarted]: 'bg-gray-100 text-gray-700 border-gray-200',
       [Status.InProgress]: 'bg-blue-100 text-blue-700 border-blue-200',
@@ -75,7 +75,11 @@ const StatusBadge = ({ status }: { status: Status }) => {
       [Status.Completed]: 'bg-green-100 text-green-700 border-green-200',
       [Status.OnHold]: 'bg-red-50 text-red-700 border-red-200',
     };
-    return <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${colors[status]}`}>{status}</span>;
+    return colors[status] || 'bg-gray-100 text-gray-700 border-gray-200';
+};
+
+const StatusBadge = ({ status }: { status: Status }) => {
+    return <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${getStatusBadgeColors(status)}`}>{status}</span>;
 };
   
 const PriorityBadge = ({ priority }: { priority: Priority }) => {
@@ -290,6 +294,7 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
                         {isEditing ? (
                             <div className="grid grid-cols-3 gap-4">
                                 <div><FieldLabel>Status</FieldLabel><Select value={formData.status} options={Object.values(Status)} onChange={(e: any) => handleChange('status', e.target.value)} /></div>
+                                {/* Status Reason removed from here in Edit Mode to be placed in main body */}
                                 <div><FieldLabel>Priority</FieldLabel><Select value={formData.priority} options={Object.values(Priority)} onChange={(e: any) => handleChange('priority', e.target.value)} /></div>
                                 <div><FieldLabel>Type</FieldLabel><Select value={formData.type} options={Object.values(TicketType)} onChange={(e: any) => handleChange('type', e.target.value)} /></div>
                                 <div><FieldLabel>Product Area</FieldLabel><Select value={formData.productArea} options={Object.values(ProductArea)} onChange={(e: any) => handleChange('productArea', e.target.value)} /></div>
@@ -299,6 +304,7 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
                         ) : (
                              <div className="flex flex-wrap items-center gap-3">
                                 <StatusBadge status={formData.status} />
+                                {/* Status Reason removed from here in View Mode */}
                                 <PriorityBadge priority={formData.priority} />
                                 <TypeBadge type={formData.type} />
                                 <div className="w-px h-5 bg-slate-300 mx-1"></div>
@@ -320,6 +326,21 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
                     </div>
 
                     <div className="p-6 space-y-6">
+                        
+                        {/* Status Reason Field - Above Dates */}
+                        <div>
+                             {isEditing ? (
+                                <div>
+                                    <FieldLabel>Status Reason</FieldLabel>
+                                    <Input value={formData.reason} onChange={(e: any) => handleChange('reason', e.target.value)} placeholder="e.g. Waiting on Client..." />
+                                </div>
+                             ) : (
+                                formData.reason && (
+                                    renderField('Status Reason', formData.reason)
+                                )
+                             )}
+                        </div>
+
                         {/* 3. Dates Section */}
                         <div className="border-b border-slate-100 pb-4">
                              <div className="grid grid-cols-3 gap-8">
@@ -550,3 +571,4 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
     </>
   );
 }
+  

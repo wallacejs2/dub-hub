@@ -42,3 +42,81 @@ export const getDaysActive = (startDate?: string) => {
   // If start date is in the future, return 0
   return diffDays < 0 ? 0 : diffDays;
 };
+
+// CSV Export Helper
+import { Ticket } from './types';
+
+export const exportTicketsToCSV = (tickets: Ticket[]) => {
+  // Define Headers
+  const headers = [
+    'ID',
+    'Name',
+    'Type',
+    'Status',
+    'Priority',
+    'Product Area',
+    'Platform',
+    'Location',
+    'Submitter',
+    'Client',
+    'Start Date',
+    'Last Updated',
+    'PMR #',
+    'PMG #',
+    'CPM #',
+    'FP Ticket Number',
+    'Ticket Thread ID',
+    'Summary',
+    'Details'
+  ];
+
+  // Map Data
+  const rows = tickets.map(t => [
+    t.id,
+    t.title,
+    t.type,
+    t.status,
+    t.priority,
+    t.productArea,
+    t.platform,
+    t.location,
+    t.submitterName,
+    t.client,
+    t.startDate || '',
+    t.lastUpdatedDate,
+    t.pmrNumber || '',
+    t.pmgNumber || '',
+    t.cpmNumber || '',
+    t.fpTicketNumber || '',
+    t.ticketThreadId || '',
+    t.summary || '',
+    t.details || ''
+  ]);
+
+  // Helper to escape fields containing commas/quotes
+  const escapeCsvField = (field: any) => {
+    if (field === null || field === undefined) return '';
+    const stringValue = String(field);
+    if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+      return `"${stringValue.replace(/"/g, '""')}"`;
+    }
+    return stringValue;
+  };
+
+  // Construct CSV String
+  const csvContent = [
+    headers.join(','),
+    ...rows.map(row => row.map(escapeCsvField).join(','))
+  ].join('\n');
+
+  // Trigger Download
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `tickets_export_${getTodayDateString().replace(/\//g, '-')}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};

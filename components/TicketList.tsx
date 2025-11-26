@@ -1,7 +1,8 @@
 
 import React, { useState, useMemo } from 'react';
 import { Ticket, Status, Priority, TicketType, ProductArea, Platform } from '../types';
-import { Filter, Trash2, Plus, Star, MapPin, LayoutGrid, Server, Clock, Hash, Building2, Calendar } from 'lucide-react';
+import { Filter, Trash2, Plus, Star, MapPin, Building2, FileSpreadsheet } from 'lucide-react';
+import { exportTicketsToCSV } from '../utils';
 
 // Helper for Status Colors (Used for Badge and Reason Text)
 const getStatusColorClasses = (status: Status) => {
@@ -277,7 +278,14 @@ export default function TicketList({
               Favorites ({counts.favorites})
             </button>
         </nav>
-        <div className="pb-2 sm:pb-0">
+        <div className="pb-2 sm:pb-0 flex items-center gap-3">
+             <button 
+                onClick={() => exportTicketsToCSV(tickets)}
+                className="flex items-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-all"
+                title="Export to CSV for Google Sheets"
+            >
+                <FileSpreadsheet size={16} /> Export to Sheets
+            </button>
             <button 
                 onClick={onAddTicket}
                 className="flex items-center gap-2 bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-all"
@@ -430,17 +438,18 @@ export default function TicketList({
 
                     {/* 2. Middle Content: Title & Summary */}
                     <div className="mb-3 pl-7"> 
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <h3 className="text-base font-bold text-slate-900 leading-tight truncate">
-                                {ticket.title}
-                            </h3>
-                            {/* Inline Status Reason */}
-                            {ticket.reason && (
-                                <span className={`shrink-0 px-1.5 py-0.5 rounded text-[10px] font-medium border ${getStatusColorClasses(ticket.status).bg} ${getStatusColorClasses(ticket.status).text} ${getStatusColorClasses(ticket.status).border}`}>
+                        <h3 className="text-base font-bold text-slate-900 leading-tight truncate mb-1">
+                            {ticket.title}
+                        </h3>
+                        
+                        {/* Status Reason moved below title */}
+                        {ticket.reason && (
+                            <div className="mb-2">
+                                <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium border ${getStatusColorClasses(ticket.status).bg} ${getStatusColorClasses(ticket.status).text} ${getStatusColorClasses(ticket.status).border}`}>
                                     {ticket.reason}
                                 </span>
-                            )}
-                        </div>
+                            </div>
+                        )}
 
                         {/* Summary */}
                         <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
