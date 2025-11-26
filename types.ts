@@ -1,7 +1,18 @@
 
 // --- Enums ---
 export enum TicketType { FeatureRequest = 'Feature Request', Issue = 'Issue', Question = 'Question' }
-export enum Status { NotStarted = 'Not Started', InProgress = 'In Progress', PMReview = 'PM Review', DevReview = 'DEV Review', OnHold = 'On Hold', Testing = 'Testing', Completed = 'Completed' }
+export enum Status { 
+  NewWaiting = 'New Waiting', 
+  Submitted = 'Submitted',
+  PMReview = 'PM Review', 
+  DevReview = 'DEV Review', 
+  OnHold = 'On Hold', 
+  PendingToDo = 'Pending ToDo',
+  Coding = 'Coding',
+  QATesting = 'QA Testing',
+  Completed = 'Completed',
+  Cancelled = 'Cancelled'
+}
 export enum Priority { P1 = 'P1', P2 = 'P2', P3 = 'P3', P4 = 'P4' }
 export enum ProductArea { Reynolds = 'Reynolds', Fullpath = 'Fullpath' }
 export enum Platform { FOCUS = 'FOCUS', UCP = 'UCP', Curator = 'Curator' }

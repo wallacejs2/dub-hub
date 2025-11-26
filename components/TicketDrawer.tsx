@@ -67,13 +67,16 @@ const Select = ({ value, onChange, options }: any) => (
 
 const getStatusBadgeColors = (status: Status) => {
     const colors = {
-      [Status.NotStarted]: 'bg-gray-100 text-gray-700 border-gray-200',
-      [Status.InProgress]: 'bg-blue-100 text-blue-700 border-blue-200',
+      [Status.NewWaiting]: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      [Status.Submitted]: 'bg-slate-100 text-slate-700 border-slate-200',
       [Status.PMReview]: 'bg-purple-100 text-purple-700 border-purple-200',
-      [Status.DevReview]: 'bg-indigo-100 text-indigo-700 border-indigo-200',
-      [Status.Testing]: 'bg-orange-100 text-orange-700 border-orange-200',
+      [Status.DevReview]: 'bg-pink-100 text-pink-700 border-pink-200',
+      [Status.OnHold]: 'bg-orange-100 text-orange-700 border-orange-200',
+      [Status.PendingToDo]: 'bg-sky-100 text-sky-700 border-sky-200',
+      [Status.Coding]: 'bg-blue-100 text-blue-700 border-blue-200',
+      [Status.QATesting]: 'bg-indigo-100 text-indigo-700 border-indigo-200',
       [Status.Completed]: 'bg-green-100 text-green-700 border-green-200',
-      [Status.OnHold]: 'bg-red-50 text-red-700 border-red-200',
+      [Status.Cancelled]: 'bg-red-100 text-red-700 border-red-200',
     };
     return colors[status] || 'bg-gray-100 text-gray-700 border-gray-200';
 };
@@ -340,20 +343,18 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
                     <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
                         {isEditing ? (
                             <div className="grid grid-cols-3 gap-4">
-                                <div><FieldLabel>Status</FieldLabel><Select value={formData.status} options={Object.values(Status)} onChange={(e: any) => handleChange('status', e.target.value)} /></div>
-                                {/* Status Reason removed from here in Edit Mode to be placed in main body */}
-                                <div><FieldLabel>Priority</FieldLabel><Select value={formData.priority} options={Object.values(Priority)} onChange={(e: any) => handleChange('priority', e.target.value)} /></div>
                                 <div><FieldLabel>Type</FieldLabel><Select value={formData.type} options={Object.values(TicketType)} onChange={(e: any) => handleChange('type', e.target.value)} /></div>
+                                <div><FieldLabel>Priority</FieldLabel><Select value={formData.priority} options={Object.values(Priority)} onChange={(e: any) => handleChange('priority', e.target.value)} /></div>
+                                <div><FieldLabel>Status</FieldLabel><Select value={formData.status} options={Object.values(Status)} onChange={(e: any) => handleChange('status', e.target.value)} /></div>
                                 <div><FieldLabel>Product Area</FieldLabel><Select value={formData.productArea} options={Object.values(ProductArea)} onChange={(e: any) => handleChange('productArea', e.target.value)} /></div>
                                 <div><FieldLabel>Platform</FieldLabel><Select value={formData.platform} options={Object.values(Platform)} onChange={(e: any) => handleChange('platform', e.target.value)} /></div>
                                 <div><FieldLabel>Location</FieldLabel><Input value={formData.location} onChange={(e: any) => handleChange('location', e.target.value)} /></div>
                             </div>
                         ) : (
                              <div className="flex flex-wrap items-center gap-3">
-                                <StatusBadge status={formData.status} />
-                                {/* Status Reason removed from here in View Mode */}
-                                <PriorityBadge priority={formData.priority} />
                                 <TypeBadge type={formData.type} />
+                                <PriorityBadge priority={formData.priority} />
+                                <StatusBadge status={formData.status} />
                                 <div className="w-px h-5 bg-slate-300 mx-1"></div>
                                 <SimpleBadge 
                                     label={formData.productArea} 

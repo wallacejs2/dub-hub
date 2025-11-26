@@ -1,19 +1,22 @@
 
 import React, { useState, useMemo } from 'react';
 import { Ticket, Status, Priority, TicketType, ProductArea, Platform } from '../types';
-import { Filter, Trash2, Plus, Star, MapPin, Building2, FileSpreadsheet } from 'lucide-react';
+import { Filter, Trash2, Plus, Star, FileSpreadsheet } from 'lucide-react';
 import { exportTicketsToCSV } from '../utils';
 
 // Helper for Status Colors (Used for Badge and Reason Text)
 const getStatusColorClasses = (status: Status) => {
   switch (status) {
-    case Status.NotStarted: return { bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-200' };
-    case Status.InProgress: return { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' };
+    case Status.NewWaiting: return { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200' };
+    case Status.Submitted: return { bg: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-200' };
     case Status.PMReview: return { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' };
-    case Status.DevReview: return { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200' };
-    case Status.Testing: return { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' };
+    case Status.DevReview: return { bg: 'bg-pink-50', text: 'text-pink-700', border: 'border-pink-200' };
+    case Status.OnHold: return { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' };
+    case Status.PendingToDo: return { bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-200' };
+    case Status.Coding: return { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' };
+    case Status.QATesting: return { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200' };
     case Status.Completed: return { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' };
-    case Status.OnHold: return { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200' };
+    case Status.Cancelled: return { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' };
     default: return { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200' };
   }
 };
@@ -22,7 +25,7 @@ const getStatusColorClasses = (status: Status) => {
 const StatusBadge = ({ status }: { status: Status }) => {
   const colors = getStatusColorClasses(status);
   return (
-    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${colors.bg} ${colors.text} ${colors.border}`}>
+    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide border ${colors.bg} ${colors.text} ${colors.border}`}>
       {status}
     </span>
   );
@@ -133,7 +136,7 @@ interface TicketListProps {
   onToggleFavorite: (id: string, e: React.MouseEvent) => void;
 }
 
-type TabType = 'Active' | 'On Hold' | 'Completed' | 'Favorites';
+type TabType = 'Active' | 'On Hold' | 'Completed' | 'Cancelled' | 'Favorites';
 
 export default function TicketList({
   tickets,
@@ -157,9 +160,10 @@ export default function TicketList({
   // --- Count Logic ---
   const counts = useMemo(() => {
     return {
-      active: tickets.filter(t => t.status !== Status.Completed && t.status !== Status.OnHold).length,
+      active: tickets.filter(t => t.status !== Status.Completed && t.status !== Status.Cancelled && t.status !== Status.OnHold).length,
       onHold: tickets.filter(t => t.status === Status.OnHold).length,
       completed: tickets.filter(t => t.status === Status.Completed).length,
+      cancelled: tickets.filter(t => t.status === Status.Cancelled).length,
       favorites: tickets.filter(t => t.isFavorite).length
     };
   }, [tickets]);
@@ -170,11 +174,13 @@ export default function TicketList({
     const result = tickets.filter((ticket) => {
       // Tab Logic
       if (activeTab === 'Active') {
-        if (ticket.status === Status.Completed || ticket.status === Status.OnHold) return false;
+        if (ticket.status === Status.Completed || ticket.status === Status.Cancelled || ticket.status === Status.OnHold) return false;
       } else if (activeTab === 'On Hold') {
         if (ticket.status !== Status.OnHold) return false;
       } else if (activeTab === 'Completed') {
         if (ticket.status !== Status.Completed) return false;
+      } else if (activeTab === 'Cancelled') {
+        if (ticket.status !== Status.Cancelled) return false;
       } else if (activeTab === 'Favorites') {
         if (!ticket.isFavorite) return false;
       }
@@ -270,6 +276,12 @@ export default function TicketList({
               className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'Completed' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}`}
             >
               Completed ({counts.completed})
+            </button>
+             <button
+              onClick={() => setActiveTab('Cancelled')}
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'Cancelled' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}`}
+            >
+              Cancelled ({counts.cancelled})
             </button>
             <button
               onClick={() => setActiveTab('Favorites')}
@@ -381,8 +393,8 @@ export default function TicketList({
                 <div 
                     key={ticket.id}
                     className={`
-                        group relative bg-white rounded-xl border p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:border-blue-300 cursor-pointer flex flex-col
-                        ${selectedTicketIds.has(ticket.id) ? 'border-primary ring-1 ring-primary bg-blue-50/30' : 'border-slate-200'}
+                        group relative rounded-xl border p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:border-blue-300 cursor-pointer flex flex-col bg-white border-slate-200
+                        ${selectedTicketIds.has(ticket.id) ? 'border-primary ring-1 ring-primary bg-blue-50/30' : ''}
                     `}
                     onClick={() => onOpenTicket(ticket.id)}
                 >
@@ -399,34 +411,35 @@ export default function TicketList({
                                 />
                             </div>
                             
+                            {/* ORDER: Type, Priority, Status, Dealership, Product Area, Platform, Location */}
+                            
                             <TypeBadge type={ticket.type} />
                             
-                            {/* Context Labels */}
-                            <div className="flex flex-wrap items-center gap-1.5">
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-50 text-slate-600 border border-slate-200 truncate max-w-[150px]">
-                                    <Building2 size={10} className="text-slate-400" /> {ticket.client}
-                                </span>
+                            <PriorityBadge priority={ticket.priority} />
+                            
+                            <StatusBadge status={ticket.status} />
+                            
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-50 text-slate-600 border border-slate-200 truncate max-w-[150px]">
+                                    {ticket.client}
+                            </span>
 
-                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${getProductAreaColor(ticket.productArea)}`}>
-                                    {ticket.productArea}
-                                </span>
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${getProductAreaColor(ticket.productArea)}`}>
+                                {ticket.productArea}
+                            </span>
 
-                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${getPlatformColor(ticket.platform)}`}>
-                                    {ticket.platform}
-                                </span>
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${getPlatformColor(ticket.platform)}`}>
+                                {ticket.platform}
+                            </span>
 
-                                {ticket.location && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-50 text-slate-500 border border-slate-200 truncate max-w-[120px]">
-                                        <MapPin size={10} className="text-slate-400" /> {ticket.location}
-                                    </span>
-                                )}
-                            </div>
+                            {ticket.location && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-50 text-slate-500 border border-slate-200 break-words">
+                                        {ticket.location}
+                                </span>
+                            )}
                         </div>
 
-                        {/* Right: Status, Priority, Favorite */}
+                        {/* Right: Favorite (Status removed) */}
                         <div className="flex items-center gap-2 shrink-0">
-                             <StatusBadge status={ticket.status} />
-                             <PriorityBadge priority={ticket.priority} />
                              <button 
                                 onClick={(e) => onToggleFavorite(ticket.id, e)}
                                 className={`ml-1 p-1.5 rounded-full transition-colors hover:bg-slate-100 ${ticket.isFavorite ? 'text-yellow-400' : 'text-slate-200 group-hover:text-slate-300'}`}
@@ -438,7 +451,10 @@ export default function TicketList({
 
                     {/* 2. Middle Content: Title & Summary */}
                     <div className="mb-3 pl-7"> 
-                        <h3 className="text-base font-bold text-slate-900 leading-tight truncate mb-1">
+                        <h3 className={`text-base font-bold leading-tight truncate mb-1 
+                            ${ticket.status === Status.Completed ? 'text-emerald-700' : 
+                              ticket.status === Status.Cancelled ? 'text-red-700' : 'text-slate-900'}
+                        `}>
                             {ticket.title}
                         </h3>
                         
