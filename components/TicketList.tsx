@@ -1,5 +1,4 @@
 
-
 import React, { useState, useMemo } from 'react';
 import { Ticket, Status, Priority, TicketType, ProductArea, Platform } from '../types';
 import { Filter, Trash2, Plus, Star, FileSpreadsheet } from 'lucide-react';
@@ -158,34 +157,11 @@ export default function TicketList({
     productArea: 'All',
   });
 
-  // --- Count Logic ---
-  const counts = useMemo(() => {
-    return {
-      active: tickets.filter(t => t.status !== Status.Completed && t.status !== Status.Cancelled && t.status !== Status.OnHold).length,
-      onHold: tickets.filter(t => t.status === Status.OnHold).length,
-      completed: tickets.filter(t => t.status === Status.Completed).length,
-      cancelled: tickets.filter(t => t.status === Status.Cancelled).length,
-      favorites: tickets.filter(t => t.isFavorite).length
-    };
-  }, [tickets]);
+  // --- Filtering Logic (Base + Counts + Tab) ---
 
-  // --- Filtering & Sorting Logic ---
-  const filteredTickets = useMemo(() => {
-    // 1. Filter
-    const result = tickets.filter((ticket) => {
-      // Tab Logic
-      if (activeTab === 'Active') {
-        if (ticket.status === Status.Completed || ticket.status === Status.Cancelled || ticket.status === Status.OnHold) return false;
-      } else if (activeTab === 'On Hold') {
-        if (ticket.status !== Status.OnHold) return false;
-      } else if (activeTab === 'Completed') {
-        if (ticket.status !== Status.Completed) return false;
-      } else if (activeTab === 'Cancelled') {
-        if (ticket.status !== Status.Cancelled) return false;
-      } else if (activeTab === 'Favorites') {
-        if (!ticket.isFavorite) return false;
-      }
-
+  // 1. Base Filter (Global Search & Dropdowns)
+  const filteredBase = useMemo(() => {
+    return tickets.filter((ticket) => {
       // Search Bar
       const searchLower = filters.search.toLowerCase();
       const matchesSearch =
@@ -204,8 +180,38 @@ export default function TicketList({
 
       return true;
     });
+  }, [tickets, filters]);
 
-    // 2. Sort
+  // 2. Count Logic (Dynamic based on filteredBase)
+  const counts = useMemo(() => {
+    return {
+      active: filteredBase.filter(t => t.status !== Status.Completed && t.status !== Status.Cancelled && t.status !== Status.OnHold).length,
+      onHold: filteredBase.filter(t => t.status === Status.OnHold).length,
+      completed: filteredBase.filter(t => t.status === Status.Completed).length,
+      cancelled: filteredBase.filter(t => t.status === Status.Cancelled).length,
+      favorites: filteredBase.filter(t => t.isFavorite).length
+    };
+  }, [filteredBase]);
+
+  // 3. Final List (Tab Selection & Sorting)
+  const filteredTickets = useMemo(() => {
+    // Apply Tab Filter
+    const result = filteredBase.filter((ticket) => {
+      if (activeTab === 'Active') {
+        return ticket.status !== Status.Completed && ticket.status !== Status.Cancelled && ticket.status !== Status.OnHold;
+      } else if (activeTab === 'On Hold') {
+        return ticket.status === Status.OnHold;
+      } else if (activeTab === 'Completed') {
+        return ticket.status === Status.Completed;
+      } else if (activeTab === 'Cancelled') {
+        return ticket.status === Status.Cancelled;
+      } else if (activeTab === 'Favorites') {
+        return ticket.isFavorite;
+      }
+      return true;
+    });
+
+    // Sort
     // Priority Weight: P1 (1) > P2 (2) > P3 (3) > P4 (4)
     const priorityWeight = {
         [Priority.P1]: 1,
@@ -229,7 +235,7 @@ export default function TicketList({
         return parseDate(b.lastUpdatedDate) - parseDate(a.lastUpdatedDate);
     });
 
-  }, [tickets, activeTab, filters]);
+  }, [filteredBase, activeTab]);
 
   // --- Selection Handlers ---
   const handleSelectOne = (id: string, checked: boolean) => {
