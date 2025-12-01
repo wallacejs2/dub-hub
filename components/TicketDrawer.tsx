@@ -1,4 +1,5 @@
 
+
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Ticket, Status, Priority, TicketType, ProductArea, Platform, Update, Dealership } from '../types';
 import { getTodayDateString, toInputDate, fromInputDate, getDaysActive } from '../utils';
@@ -148,19 +149,29 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
         }
 
         let finalLastUpdated = getTodayDateString();
+        let finalClosedDate = formData.closedDate;
+        const isClosedStatus = formData.status === Status.Completed || formData.status === Status.Cancelled;
 
         // Check if Last Updated Date was manually modified by the user
-        // If the date in formData is different from the original ticket date (and we are not creating a new one from scratch where it's already today), preserve the manual change.
         if (!isNew && ticket && formData.lastUpdatedDate !== ticket.lastUpdatedDate) {
              finalLastUpdated = formData.lastUpdatedDate;
         } 
-        // If it's new, we trust the formData (which defaults to today, but can be changed by user)
         else if (isNew) {
              finalLastUpdated = formData.lastUpdatedDate;
         }
-        // Otherwise (User didn't touch the date, but modified other fields), auto-update to Today.
 
-        const updated = { ...formData, lastUpdatedDate: finalLastUpdated };
+        // Handle Closed Date Logic
+        // If status is Completed/Cancelled and closedDate is empty, set it to Today
+        if (isClosedStatus) {
+            if (!finalClosedDate) {
+                finalClosedDate = getTodayDateString();
+            }
+        } else {
+            // If status is NOT closed (i.e. re-opened), clear the closed date
+            finalClosedDate = undefined;
+        }
+
+        const updated = { ...formData, lastUpdatedDate: finalLastUpdated, closedDate: finalClosedDate };
         onUpdate(updated);
         setFormData(updated);
         setIsEditing(false);
@@ -197,6 +208,7 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
     const fields = [
         formData.startDate,
         formData.lastUpdatedDate,
+        formData.closedDate, // Added Closed Date
         formData.title,
         formData.priority,
         formData.productArea,
@@ -408,7 +420,7 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
 
                         {/* 3. Dates Section */}
                         <div className="border-b border-slate-100 pb-4">
-                             <div className="grid grid-cols-3 gap-8">
+                             <div className="grid grid-cols-4 gap-8">
                                 {isEditing ? (
                                     <>
                                         <div>
@@ -419,12 +431,27 @@ export default function TicketDrawer({ isOpen, onClose, ticket, onUpdate, onDele
                                             <FieldLabel>Last Updated</FieldLabel>
                                             <Input type="date" value={toInputDate(formData.lastUpdatedDate)} onChange={(e: any) => handleChange('lastUpdatedDate', fromInputDate(e.target.value))} />
                                         </div>
+                                        {/* Closed Date - Only visible if Completed or Cancelled */}
+                                        {(formData.status === Status.Completed || formData.status === Status.Cancelled) && (
+                                            <div>
+                                                <FieldLabel>Closed Date</FieldLabel>
+                                                <Input type="date" value={toInputDate(formData.closedDate)} onChange={(e: any) => handleChange('closedDate', fromInputDate(e.target.value))} />
+                                            </div>
+                                        )}
+                                        {/* Days Active - Not editable */}
                                     </>
                                 ) : (
                                     <>
                                         {renderField('Start Date', <span className="flex items-center gap-2"><Calendar size={14} className="text-slate-400"/> {formData.startDate}</span>)}
                                         {renderField('Last Updated', <span className="flex items-center gap-2"><Clock size={14} className="text-slate-400"/> {formData.lastUpdatedDate}</span>)}
-                                        {renderField('Days Active', <span className="font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">{getDaysActive(formData.startDate)} Days</span>)}
+                                        
+                                        {(formData.status === Status.Completed || formData.status === Status.Cancelled) ? (
+                                             renderField('Closed Date', <span className="flex items-center gap-2"><Calendar size={14} className="text-emerald-500"/> {formData.closedDate}</span>)
+                                        ) : (
+                                            <div></div> // Empty col
+                                        )}
+
+                                        {renderField('Days Active', <span className="font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">{getDaysActive(formData.startDate, formData.closedDate)} Days</span>)}
                                     </>
                                 )}
                              </div>

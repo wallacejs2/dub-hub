@@ -34,6 +34,7 @@ export interface Ticket {
   // Dates
   startDate?: string; // MM/DD/YYYY
   lastUpdatedDate: string; // MM/DD/YYYY - Auto-updates on ANY change
+  closedDate?: string; // MM/DD/YYYY - Only for Completed/Cancelled
   submissionDate: string; // MM/DD/YYYY
 
   // Classification

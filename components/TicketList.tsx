@@ -1,8 +1,9 @@
 
+
 import React, { useState, useMemo } from 'react';
 import { Ticket, Status, Priority, TicketType, ProductArea, Platform } from '../types';
 import { Filter, Trash2, Plus, Star, FileSpreadsheet } from 'lucide-react';
-import { exportTicketsToCSV } from '../utils';
+import { exportTicketsToCSV, getTodayDateString } from '../utils';
 
 // Helper for Status Colors (Used for Badge and Reason Text)
 const getStatusColorClasses = (status: Status) => {
@@ -239,16 +240,25 @@ export default function TicketList({
   };
 
   // --- Days Active Calculation ---
-  const getDaysActive = (startDate?: string) => {
+  const getDaysActive = (startDate?: string, endDate?: string) => {
     if (!startDate) return null;
     const [mm, dd, yyyy] = startDate.split('/').map(Number);
     const start = new Date(yyyy, mm - 1, dd);
-    const today = new Date();
+    
+    let end = new Date();
+    if (endDate) {
+        const endParts = endDate.split('/');
+        if (endParts.length === 3) {
+            const [emm, edd, eyyyy] = endParts.map(Number);
+            end = new Date(eyyyy, emm - 1, edd);
+        }
+    }
+    
     // Reset time to ensure only date difference is calculated
     start.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
     
-    const diffTime = today.getTime() - start.getTime();
+    const diffTime = end.getTime() - start.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     // If start date is in the future, return 0
     return diffDays < 0 ? 0 : diffDays;
@@ -502,10 +512,10 @@ export default function TicketList({
 
                         <div className="flex items-center gap-3 text-[10px] text-slate-400 font-medium whitespace-nowrap ml-auto sm:ml-0">
                             <span>Updated {ticket.lastUpdatedDate}</span>
-                            {getDaysActive(ticket.startDate) !== null && (
+                            {getDaysActive(ticket.startDate, ticket.closedDate) !== null && (
                                 <span className="flex items-center gap-1">
                                     <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                                    {getDaysActive(ticket.startDate)} Days Active
+                                    {getDaysActive(ticket.startDate, ticket.closedDate)} Days Active
                                 </span>
                             )}
                         </div>
