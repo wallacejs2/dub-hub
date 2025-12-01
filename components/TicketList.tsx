@@ -157,11 +157,10 @@ export default function TicketList({
     productArea: 'All',
   });
 
-  // --- Filtering Logic ---
+  // --- Filtering Logic (Base + Counts + Tab) ---
 
-  // 1. Criteria Matches (Search, Priority, Type, ProductArea) - IGNORING Status Dropdown
-  // This allows the tab counts to show matches across all statuses, even if the user filters for a specific status.
-  const ticketsMatchingCriteria = useMemo(() => {
+  // 1. Base Filter (Global Search & Dropdowns)
+  const filteredBase = useMemo(() => {
     return tickets.filter((ticket) => {
       // Search Bar
       const searchLower = filters.search.toLowerCase();
@@ -173,38 +172,31 @@ export default function TicketList({
         
       if (!matchesSearch) return false;
 
-      // Dropdown Filters (excluding Status)
+      // Dropdown Filters
+      if (filters.status !== 'All' && ticket.status !== filters.status) return false;
       if (filters.priority !== 'All' && ticket.priority !== filters.priority) return false;
       if (filters.type !== 'All' && ticket.type !== filters.type) return false;
       if (filters.productArea !== 'All' && ticket.productArea !== filters.productArea) return false;
 
       return true;
     });
-  }, [tickets, filters.search, filters.priority, filters.type, filters.productArea]);
+  }, [tickets, filters]);
 
-  // 2. Count Logic (Dynamic based on ticketsMatchingCriteria)
+  // 2. Count Logic (Dynamic based on filteredBase)
   const counts = useMemo(() => {
     return {
-      active: ticketsMatchingCriteria.filter(t => t.status !== Status.Completed && t.status !== Status.Cancelled && t.status !== Status.OnHold).length,
-      onHold: ticketsMatchingCriteria.filter(t => t.status === Status.OnHold).length,
-      completed: ticketsMatchingCriteria.filter(t => t.status === Status.Completed).length,
-      cancelled: ticketsMatchingCriteria.filter(t => t.status === Status.Cancelled).length,
-      favorites: ticketsMatchingCriteria.filter(t => t.isFavorite).length
+      active: filteredBase.filter(t => t.status !== Status.Completed && t.status !== Status.Cancelled && t.status !== Status.OnHold).length,
+      onHold: filteredBase.filter(t => t.status === Status.OnHold).length,
+      completed: filteredBase.filter(t => t.status === Status.Completed).length,
+      cancelled: filteredBase.filter(t => t.status === Status.Cancelled).length,
+      favorites: filteredBase.filter(t => t.isFavorite).length
     };
-  }, [ticketsMatchingCriteria]);
+  }, [filteredBase]);
 
-  // 3. Final List (Apply Status Filter AND Tab Filter)
+  // 3. Final List (Tab Selection & Sorting)
   const filteredTickets = useMemo(() => {
-    // Start with the criteria matches
-    let result = ticketsMatchingCriteria;
-
-    // Apply specific Status Filter if selected
-    if (filters.status !== 'All') {
-        result = result.filter(t => t.status === filters.status);
-    }
-
     // Apply Tab Filter
-    result = result.filter((ticket) => {
+    const result = filteredBase.filter((ticket) => {
       if (activeTab === 'Active') {
         return ticket.status !== Status.Completed && ticket.status !== Status.Cancelled && ticket.status !== Status.OnHold;
       } else if (activeTab === 'On Hold') {
@@ -243,7 +235,7 @@ export default function TicketList({
         return parseDate(b.lastUpdatedDate) - parseDate(a.lastUpdatedDate);
     });
 
-  }, [ticketsMatchingCriteria, filters.status, activeTab]);
+  }, [filteredBase, activeTab]);
 
   // --- Selection Handlers ---
   const handleSelectOne = (id: string, checked: boolean) => {
@@ -436,6 +428,7 @@ export default function TicketList({
                             </div>
                             
                             {/* ORDER: Type, Priority, Dealership, Product Area, Platform, Location */}
+                            {/* Status and Release removed from here */}
                             
                             <TypeBadge type={ticket.type} />
                             
