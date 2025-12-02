@@ -1,7 +1,9 @@
 
 import React, { useState, useMemo } from 'react';
 import { Dealership, DealershipStatus } from '../types';
-import { Filter, Plus, Building2 } from 'lucide-react';
+import { Filter, Plus, Building2, FileSpreadsheet } from 'lucide-react';
+import { exportDealershipsToCSV } from '../utils';
+import { DMT_PRODUCTS } from '../mockData';
 
 const StatusBadge = ({ status }: { status: DealershipStatus }) => {
     const colors = {
@@ -107,12 +109,20 @@ export default function DealershipList({
                     onChange={(e) => setFilter(e.target.value)}
                 />
             </div>
-            <button 
-                onClick={onAddDealership}
-                className="flex items-center gap-2 bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-all whitespace-nowrap"
-            >
-                <Plus size={16} /> New Dealership
-            </button>
+            <div className="flex items-center gap-2">
+                 <button 
+                    onClick={() => exportDealershipsToCSV(dealerships, DMT_PRODUCTS)}
+                    className="flex items-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-all whitespace-nowrap"
+                >
+                    <FileSpreadsheet size={16} /> Export CSV
+                </button>
+                <button 
+                    onClick={onAddDealership}
+                    className="flex items-center gap-2 bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-all whitespace-nowrap"
+                >
+                    <Plus size={16} /> New Dealership
+                </button>
+            </div>
         </div>
 
         {/* List */}
